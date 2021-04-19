@@ -10,12 +10,27 @@ namespace LyingD
 	LDserver::LDserver(int amountOfThreads)
 	{
 		this->createThreads(amountOfThreads);
+		this->runTimer(5);
 	}
 
 	LDserver::~LDserver()
 	{
 		this->work.reset();
 		this->worker_threads.join_all();
+		//this->pool.join();
+	}
+
+	void LDserver::timerHandler(const bsys::error_code& error)
+	{
+		if (error)
+		{
+			//foo
+		}
+		else
+		{
+			std::cout << "Timepassing" << std::endl;
+			//bar
+		}
 	}
 
 	void LDserver::LOG(const char* message)
@@ -23,6 +38,11 @@ namespace LyingD
 		global_stream_lock.lock();
 		std::cout << "[" << boost::this_thread::get_id() << "] " << message << std::endl;
 		global_stream_lock.unlock();
+	}
+
+	void LDserver::runTimer(int seconds)
+	{
+		this->timer.expires_from_now(boost::posix_time::seconds(seconds));
 	}
 
 	void LDserver::printNum(int x)
@@ -41,8 +61,9 @@ namespace LyingD
 		for (;;)
 		{
 			try
-			{
+			{				
 				boost::system::error_code ec;
+				this->timer.async_wait(boost::bind(&LDserver::timerHandler, this, ec));
 				io_service->run(ec);
 				if (ec)
 				{
@@ -81,5 +102,17 @@ namespace LyingD
 		this->io_service->post(boost::bind(&LDserver::raiseException, this));
 
 		throw(std::runtime_error("Srry!"));
+	}
+
+	void LDserver::mainThread()
+	{
+		this->global_stream_lock.lock();
+		std::cout << "[" << boost::this_thread::get_id() << "] This wil exit when all work is finished" << std::endl;
+		this->global_stream_lock.unlock();
+
+		this->postPrintNum(1);
+		this->postPrintNum(2);
+		this->postPrintNum(3);
+		this->postPrintNum(4);
 	}
 }
