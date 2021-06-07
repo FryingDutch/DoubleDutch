@@ -12,8 +12,10 @@ LMserver::LMserver(unsigned int portNum)
   ([&] {
     crow::json::wvalue x;
     for (unsigned int i = 0; i < lockVector.size(); i++) {
-      x[lockVector[i].name] = "NAME"; 
-      x[lockVector[i].user_id] = "USER_ID";
+      /*
+      x[lockVector[i].getName()] = "NAME"; 
+      x[lockVector[i].getuser_id()] = "USER_ID"; 
+      */
     }
     return x;
   });
@@ -47,7 +49,7 @@ bool LMserver::getLock(std::string lockName, unsigned int user_id)
 {
   this->storageMutex.lock();
   for (long unsigned int i = 0; i < this->lockVector.size(); i++) {
-    if (lockName == lockVector[i].name) {
+    if (lockName == lockVector[i].getName()) {
       this->storageMutex.unlock(); 
       return false;
     }
@@ -65,7 +67,7 @@ bool LMserver::releaseLock(std::string lockName, unsigned int user_id)
 {
   this->storageMutex.lock();
   for (long unsigned int i = 0; i < this->lockVector.size(); i++) {
-    if (lockName == lockVector[i].name && user_id == lockVector[i].user_id) {
+    if (lockName == lockVector[i].getName() && user_id == lockVector[i].getUser_id()) {
       this->lockVector.erase(this->lockVector.begin() + i);
       this->storageMutex.unlock();
       return true;
