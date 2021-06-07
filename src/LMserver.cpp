@@ -8,14 +8,14 @@ LMserver::LMserver(unsigned int portNum)
   CROW_ROUTE(app, "/")([]() { return "Hello LockWorld"; });
 
   //need to figure out how to return a full json template in this
-  CROW_ROUTE(app, "/status")
+  CROW_ROUTE(app, "/status/json")
   ([&] {
-    std::string tempString;
+    crow::json::wvalue x;
     for (unsigned int i = 0; i < lockVector.size(); i++) {
-      tempString = tempString + "Name = " + lockVector[i].name +
-                   "\nID = " + (std::string)lockVector[i].user_id + "\n\n";   
+      x[lockVector[i].name] = "NAME"; 
+      x[lockVector[i].user_id] = "USER_ID";
     }
-    return tempString;
+    return x;
   });
 
   CROW_ROUTE(app, "/getLock/<string>/<int>")
