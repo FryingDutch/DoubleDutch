@@ -13,8 +13,7 @@ class LMserver
   std::vector<Lock> lockVector;
 
  private:
-  bool getLock(std::string lockName, unsigned int id);
-  bool releaseLock(std::string lockName, unsigned int id);
+  std::string createHash();
 
  public:
   LMserver(const unsigned int portNum);
