@@ -1,13 +1,13 @@
 # LockManager: a distributed advisory lock
 
-**LockManager** is a C++ program that coordinates distributed access to shared resources, such as databases or file systems. Clients make requests to LockManager, asking for exclusive usage of a resource (or permission to perform a one-time task). Once the client is finished (or timed-out), the lock is released and ready to be acquired by another client. This project is inspired by MySQL's `GET_LOCK` [function](https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock). LockManager is a http server, based on [boost.asio](https://www.boost.org/doc/libs/1_75_0/doc/html/boost_asio.html). 
+**LockManager** is a C++ program that coordinates distributed access to shared resources, such as databases or file systems. Clients make requests to LockManager, asking for exclusive usage of a resource (or permission to perform a one-time task). Once the client is finished (or timed-out), the lock is released and ready to be acquired by another client. This project is inspired by MySQL's `GET_LOCK` [function](https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock). LockManager is a http server, based on [CrowCpp](https://crowcpp.org/). 
 
 
 ## Usage
 Any client that can communicate over http(s), can use the server. When using a Python client, a request to access the `database` resource may look like:
 ```python
 # try to acquire the lock on the database
-response = requests.get('<hostname>:<port>/acquireLock?resource=database')
+response = requests.get('<hostname>:<port>/getLock?resource=database')
 json_response = json.loads(reponse.text)
 
 # if the lock to the resource was granted to this client
