@@ -7,18 +7,11 @@
 Any client that can communicate over http(s), can use the server. When using a Python client, a request to access the `database` resource may look like:
 ```python
 # try to acquire the lock on the database
-response = requests.get('<hostname>:<port>/getLock?resource=database')
-json_response = json.loads(reponse.text)
-
-# if the lock to the resource was granted to this client
-if json_response['lock_acquired'] == True:
-  do_stuff_with_database() # this may take some time
-  requests.get('<hostname>:<port>/releaseLock?resource=database') # release the lock on the database
-
-# if another client currently locks the database
-elif json_response['lock_acquired'] == False:
-  retry_or_wait()
-```
+response = requests.get('<hostname>:<port>/getLock/yourLockAsString')
+while response == "false":
+  response = requests.get('<hostname>:<port>/getLock/yourLockAsString')
+  
+# if the lock to the resource was granted to this client they will receive a random unique string of 32 chararcters that will be needed to release the lock later.
   
 ## Installation and set-up
 LockManager runs inside a Docker container. To build using the provided _.Dockerfile_:
