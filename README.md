@@ -7,11 +7,19 @@
 Any client that can communicate over http(s), can use the server. When using a Python client, a request to access the `database` resource may look like:
 ```python
 # try to acquire the lock on the database
-response = requests.get('<hostname>:<port>/getLock/yourLockAsString')
-while response == "false":
-  response = requests.get('<hostname>:<port>/getLock/yourLockAsString')
-  
-# if the lock to the resource was granted to this client they will receive a random unique string of 32 chararcters that will be needed to release the lock later.
+r = requests.get("http://localhost:8000/getLock/lockAsString")
+
+# if a lock is not yet available you can choose to wait
+while r.text == "false" or r.status_code != 200:
+       r = requests.get("http://localhost:8000/getLock/lockAsString")
+else:
+    key = r.text
+```
+ If the lock to the resource was granted, the client will receive a random unique string of 32 chararcters that will be needed to release the lock later.
+ When using a Python Client, a request to release the lock may look like this:
+```
+r = requests.get("http://localhost:8000/releaseLock/lockAsString/"+key)
+```
   
 ## Installation and set-up
 LockManager runs inside a Docker container. To build using the provided _.Dockerfile_:
@@ -32,4 +40,4 @@ Distributed locks are used for roughly [two reasons](https://martin.kleppmann.co
 When you're using LockManager for the latter reason, you cannot use LockManager in cluster mode. When employing LockerManager for efficiency reasons, though, you can easily spin up multiple instances (on different servers). In that case, you have to ensure that the clients are aware of all the hostnames. When one server is down, clients can try to acquire a lock at the 'next' LockManager instances. 
 
 ## Known issues and limitations
-- None :)
+- No current timeout on the lock, in case the releasing never happens.
