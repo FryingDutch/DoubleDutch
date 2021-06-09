@@ -1,24 +1,24 @@
 # LockManager: a distributed advisory lock
 
-**LockManager** is a C++ program that coordinates distributed access to shared resources, such as databases or file systems. Clients make requests to LockManager, asking for exclusive usage of a resource (or permission to perform a one-time task). Once the client is finished (or timed-out), the lock is released and ready to be acquired by another client. This project is inspired by MySQL's `GET_LOCK` [function](https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock). LockManager is a http server, based on [CrowCpp](https://crowcpp.org/). 
+**LockManager** is a C++ program that coordinates distributed access to shared resources, such as databases or file systems. Clients make requests to LockManager, asking for exclusive usage of a resource (or permission to perform a one-time task). Once the client is finished (or timed-out), the lock is released and ready to be acquired by another client. This project is inspired by MySQL's `GET_LOCK` [function](https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock). LockManager is a http server, based on [CrowCpp](https://github.com/CrowCpp/crow/tree/master). 
 
 
 ## Usage
 Any client that can communicate over http(s), can use the server. When using a Python client, a request to access the `database` resource may look like:
 ```python
 # try to acquire the lock on the database
-r = requests.get("http://localhost:8000/getLock/lockAsString")
+r = requests.get("http://<host>:<port>/getLock/lock_as_string")
 
 # if a lock is not yet available you can choose to wait
 while r.text == "false" or r.status_code != 200:
-       r = requests.get("http://localhost:8000/getLock/lockAsString")
+       r = requests.get("http://<host>:<port>/getLock/lock_as_string")
 else:
     key = r.text
 ```
  If the lock to the resource was granted, the client will receive a random unique string of 32 chararcters that will be needed to release the lock later.
  When using a Python Client, a request to release the lock may look like this:
 ```
-r = requests.get("http://localhost:8000/releaseLock/lockAsString/"+key)
+r = requests.get("http://<host>:<port>/releaseLock/lock_as_string/"+key)
 ```
   
 ## Installation and set-up
