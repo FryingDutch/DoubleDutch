@@ -1,6 +1,6 @@
+#pragma once
 #ifndef LMSERVER_H
 #define LMSERVER_H
-
 #include <boost/thread.hpp>
 #include <string>
 #include <vector>
@@ -9,14 +9,18 @@
 class LMserver
 {
  private:
-  boost::mutex storageMutex;
-  std::vector<Lock> lockVector;
+  static unsigned int m_portNum;
+  static boost::mutex m_storageMutex;
 
  private:
-  std::string createHash();
+  static std::string m_createID();  
+  static std::vector<Lock> m_lockVector;
 
  public:
-  LMserver(const unsigned int portNum);
+  static void m_startup();
+ 
+ public:
+  LMserver();
 };
 
 #endif
