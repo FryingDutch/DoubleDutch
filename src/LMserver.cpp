@@ -4,71 +4,79 @@
 #include "LMserver.h"
 #include "crow.h"
 
-LMserver::LMserver(unsigned int portNum)
-{
+unsigned int LMserver::m_portNum = 8000;
+std::vector<Lock> LMserver::m_lockVector;
+boost::mutex LMserver::m_storageMutex;
+
+LMserver::LMserver()  
+{  }
+
+void LMserver::m_startup() {
+
   crow::SimpleApp app;
   CROW_ROUTE(app, "/")([]() { return "Welcome to LockManager"; });
 
-  //need to figure out how to return an actual json
+  // need to figure out how to return an actual json
   CROW_ROUTE(app, "/status")
   ([&] {
     std::string tempString;
-    for (unsigned int i = 0; i < this->lockVector.size(); i++) {
-      tempString = tempString + "LOCK= " + this->lockVector[i].getName() + "\n" + "USER_ID= " + this->lockVector[i].getUser_id() + "\n\n";
+    for (long unsigned int i = 0; i < LMserver::m_lockVector.size(); i++) {
+      tempString = tempString + "LOCK= " + LMserver::m_lockVector[i].getName() +
+                   "\n" + "USER_ID= " + LMserver::m_lockVector[i].getUser_id() +
+                   "\n\n";
     }
     return tempString;
   });
 
-  //Getting the lock
+  // Getting the lock
   CROW_ROUTE(app, "/getLock/<string>")
   ([&](std::string lockName) {
-      this->storageMutex.lock();
-      for (long unsigned int i = 0; i < this->lockVector.size(); i++) {
-        if (lockName == this->lockVector[i].getName()) {
-          this->storageMutex.unlock();
-          std::string ep = "false";
-          return ep;
-        }
+    LMserver::m_storageMutex.lock();
+    for (long unsigned int i = 0; i < LMserver::m_lockVector.size(); i++) {
+      if (lockName == LMserver::m_lockVector[i].getName()) {
+        LMserver::m_storageMutex.unlock();
+        std::string ep = "false";
+        return ep;
       }
+    }
+    std::string newID = LMserver::m_createID();
+    Lock *tempLock = new Lock(lockName, newID);
+    LMserver::m_lockVector.push_back(*tempLock);
+    delete tempLock;
 
-      std::string newID = this->createHash();
-      Lock *tempLock = new Lock(lockName, newID);
-      this->lockVector.push_back(*tempLock);
-      delete tempLock;
-
-      this->storageMutex.unlock();
-      return newID;
+    LMserver::m_storageMutex.unlock();
+    return newID;
   });
 
-  //Releasing the lock
+  // Releasing the lock
   CROW_ROUTE(app, "/releaseLock/<string>/<string>")
   ([&](std::string lockName, std::string user_id) {
-    this->storageMutex.lock();
-    for (long unsigned int i = 0; i < this->lockVector.size(); i++) {
-      if (lockName == this->lockVector[i].getName() &&
-          user_id == this->lockVector[i].getUser_id()) {
-        this->lockVector.erase(this->lockVector.begin() + i);
-        this->storageMutex.unlock();
+    LMserver::m_storageMutex.lock();
+    for (long unsigned int i = 0; i < LMserver::m_lockVector.size(); i++) {
+      if (lockName == LMserver::m_lockVector[i].getName() &&
+          user_id == LMserver::m_lockVector[i].getUser_id()) {
+        LMserver::m_lockVector.erase(LMserver::m_lockVector.begin() + i);
+        LMserver::m_storageMutex.unlock();
         return "released";
       }
     }
-    this->storageMutex.unlock();
+    LMserver::m_storageMutex.unlock();
     return "false";
   });
 
-  app.port(portNum).multithreaded().run();
+  app.port(LMserver::m_portNum).multithreaded().run();
 }
 
-std::string LMserver::createHash() 
+std::string LMserver::m_createID() 
 {
   static std::string str =
       "01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   std::random_device rd;
   std::mt19937 generator(rd());
   std::shuffle(str.begin(), str.end(), generator);
-  for (unsigned int i = 0; i < this->lockVector.size(); i++) {
-    if (str.substr(0, 32) == this->lockVector[i].getUser_id()) {
-      this->createHash();    
+  for (long unsigned int i = 0; i < LMserver::m_lockVector.size(); i++) {
+    if (str.substr(0, 32) == LMserver::m_lockVector[i].getUser_id()) {
+      return LMserver::m_createID();    
     }
   }
   return str.substr(0, 32);
