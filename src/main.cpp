@@ -1,6 +1,10 @@
+#define CROW_MAIN 
+#include <iostream>
+#include <string>
+#include <thread>
 #include "LMserver.h"
 
-LMserver s1(8000);
-
 int main() 
-{}
+{ 
+	LMserver::m_startup(); 
+}
