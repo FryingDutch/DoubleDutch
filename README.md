@@ -41,3 +41,4 @@ When you're using LockManager for the latter reason, you cannot use LockManager 
 
 ## Known issues and limitations
 - No current timeout on the lock, in case the releasing never happens.
+- No current time out for the request on a lock, user has to define its own response to the situation.
