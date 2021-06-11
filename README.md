@@ -29,9 +29,9 @@ DoubleDutch runs inside a Docker container. To build using the provided _.Docker
 ```bash
 docker build . -t server .
 ```
-To run and listen for connections on port 80:
+To run and listen for connections on port 8000:
 ```
-docker run -p 80:80 server
+docker run -p 8000:8000 server
 ```
 
 
