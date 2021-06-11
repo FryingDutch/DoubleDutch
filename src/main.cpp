@@ -1,9 +1,10 @@
 #define CROW_MAIN 
-#include <iostream>
-#include <string>
+#include <thread>
 #include "LMserver.h"
 
 int main() 
 { 
-	LMserver::m_startup(8000); 
+	std::thread th1(&DoubleD::LMserver::m_startup, 8000); 
+	DoubleD::LMserver::m_checkLifetimes();
+	th1.join();
 }
