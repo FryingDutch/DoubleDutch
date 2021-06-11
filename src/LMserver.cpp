@@ -4,15 +4,15 @@
 #include "LMserver.h"
 #include "crow.h"
 
-unsigned int LMserver::m_portNum = 8000;
 std::vector<Lock> LMserver::m_lockVector;
 boost::mutex LMserver::m_storageMutex;
 
 LMserver::LMserver()  
 {  }
 
-void LMserver::m_startup() {
+void LMserver::m_startup(const unsigned int portNum) {
 
+    std::cout << std::this_thread::get_id() << "\n";
   crow::SimpleApp app;
   CROW_ROUTE(app, "/")([]() { return "Welcome to LockManager"; });
 
@@ -64,7 +64,7 @@ void LMserver::m_startup() {
     return "false";
   });
 
-  app.port(LMserver::m_portNum).multithreaded().run();
+  app.port(portNum).multithreaded().run();
 }
 
 std::string LMserver::m_createID() 
