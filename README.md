@@ -28,7 +28,7 @@ docker build -t LockManager .
 ```
 To run and listen for connections on port 80:
 ```
-docker run LockManager -p 80:80
+docker run -p 80:80 LockManager
 ```
 
 
