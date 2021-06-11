@@ -2,11 +2,10 @@ cmake_minimum_required(VERSION 3.0)
 project ( server )
 
 add_executable(server 
-		LMserver.cpp
-		LMserver.h
+		main.cpp
 		lock.cpp
-		Lock.h
-		main.cpp)
+		LMserver.cpp
+		)
 target_link_libraries(server ${Boost_LIBRARIES})
 target_link_libraries(server ${CMAKE_THREAD_LIBS_INIT})
 
