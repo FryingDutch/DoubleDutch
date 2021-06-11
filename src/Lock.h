@@ -1,16 +1,26 @@
 #ifndef LOCK_H
 #define LOCK_H
 #include <string>
+#include <chrono>
 
-class Lock
+namespace DoubleD
 {
- private:
-  std::string name;
-  std::string user_id;
+    class Lock
+    {
+    private:
+        std::string m_name;
+        std::string m_user_id;
 
- public:
-  Lock(std::string _name, std::string _id) : name(_name), user_id(_id){};
-  std::string getName() { return this->name; }
-  std::string getUser_id() { return this->user_id; }
-};
+    public:
+        double m_lifeTime;
+        std::chrono::_V2::system_clock::time_point m_start;
+
+    public:
+        Lock(std::string _name, std::string _id, double _lifeTime);
+        bool m_expired();
+        std::string m_getName();
+        std::string m_getUser_id();
+    };
+}
+
 #endif
