@@ -1,13 +1,16 @@
-# LockManager: a distributed advisory lock
+# DoubleDutch: a distributed advisory lock
 
-**LockManager** is a C++ program that coordinates distributed access to shared resources, such as databases or file systems. Clients make requests to LockManager, asking for exclusive usage of a resource (or permission to perform a one-time task). Once the client is finished (or timed-out), the lock is released and ready to be acquired by another client. This project is inspired by MySQL's `GET_LOCK` [function](https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock). LockManager is a http server, based on [CrowCpp](https://github.com/CrowCpp/crow/tree/master). 
+**DoubleDutch** is a C++ program that coordinates distributed access to shared resources, such as databases or file systems. Clients make requests to LockManager, asking for exclusive usage of a resource (or permission to perform a one-time task). Once the client is finished (or timed-out), the lock is released and ready to be acquired by another client. This project is inspired by MySQL's `GET_LOCK` [function](https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock). LockManager is a http server, based on [CrowCpp](https://github.com/CrowCpp/crow/tree/master). 
 
 
 ## Usage
 Any client that can communicate over http(s), can use the server. When using a Python client, a request to access the `database` resource may look like:
 ```python
-# try to acquire the lock on the database
+# try to acquire the lock on the database with a default lock lifetime(30s)
 r = requests.get("http://<host>:<port>/getLock/lock_as_string")
+
+# try to acquire the lock on the database with a custom lock lifetime(seconds)
+r = requests.get("http://<host>:<port>/getLock/lock_as_string/15")
 
 # if a lock is not yet available you can choose to wait
 while r.text == "false" or r.status_code != 200:
@@ -24,11 +27,11 @@ r = requests.get("http://<host>:<port>/releaseLock/lock_as_string/"+key)
 ## Installation and set-up
 LockManager runs inside a Docker container. To build using the provided _.Dockerfile_:
 ```bash
-docker build -t LockManager .
+docker build -t DoubleDutch .
 ```
 To run and listen for connections on port 80:
 ```
-docker run -p 80:80 LockManager
+docker run -p 80:80 DoubleDutch
 ```
 
 
@@ -40,5 +43,5 @@ Distributed locks are used for roughly [two reasons](https://martin.kleppmann.co
 When you're using LockManager for the latter reason, you cannot use LockManager in cluster mode. When employing LockerManager for efficiency reasons, though, you can easily spin up multiple instances (on different servers). In that case, you have to ensure that the clients are aware of all the hostnames. When one server is down, clients can try to acquire a lock at the 'next' LockManager instances. 
 
 ## Known issues and limitations
-- No current timeout on the lock, in case the releasing never happens.
 - No current time out for the request on a lock, user has to define its own response to the situation.
+- No gracious way to exit the server, it has to be forced.
