@@ -6,18 +6,23 @@
 #include <vector>
 #include "Lock.h"
 
-class LMserver
+namespace DoubleD
 {
- public:
-  static boost::mutex m_storageMutex;
-  static std::vector<Lock> m_lockVector;
+	class LMserver
+	{
+	private:
+		static bool isRunning;
+		static boost::mutex m_storageMutex;
+		static std::vector<Lock> m_lockVector;
 
- private:
-  static std::string m_createID();  
- 
- public:
-  LMserver();
-  static void m_startup(const unsigned int portNum);
-};
+	private:
+		static std::string m_createID();
+
+	public:
+		LMserver();
+		static void m_startup(const unsigned int portNum);
+		static void m_checkLifetimes();
+	};
+}
 
 #endif
