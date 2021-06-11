@@ -8,19 +8,16 @@
 
 class LMserver
 {
- private:
-  static unsigned int m_portNum;
+ public:
   static boost::mutex m_storageMutex;
+  static std::vector<Lock> m_lockVector;
 
  private:
   static std::string m_createID();  
-  static std::vector<Lock> m_lockVector;
-
- public:
-  static void m_startup();
  
  public:
   LMserver();
+  static void m_startup(const unsigned int portNum);
 };
 
 #endif
