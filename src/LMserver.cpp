@@ -52,6 +52,27 @@ namespace DoubleD
             return tempLock.m_getUser_id();
                 });
 
+        // Getting the lock with a default lock lifetime and a request timeout
+        CROW_ROUTE(app, "/getLock/<int>/<string>")
+            ([&](unsigned int timeout, std::string lockName) {
+            DDserver::m_storageMutex.lock();
+            for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
+                if (lockName == DDserver::m_lockVector[i].m_getName()) {
+                    if (DDserver::m_reqTimedout(timeout, lockName))
+                    {
+                        DDserver::m_storageMutex.unlock();
+                        std::string ep = "false";
+                        return ep;
+                    }
+                }
+            }
+            Lock tempLock(lockName, 30.0f);
+            DDserver::m_lockVector.push_back(tempLock);
+
+            DDserver::m_storageMutex.unlock();
+            return tempLock.m_getUser_id();
+                });
+
         // Getting the lock with a custom lock lifetime
         CROW_ROUTE(app, "/getLock/<string>/<int>")
             ([&](std::string lockName, unsigned int lockLife) {
@@ -153,7 +174,6 @@ namespace DoubleD
                     break;
                 }
 
-                //statement doesnt seem to be catching
                 else if (i == DDserver::m_lockVector.size() - 1)
                 {
                     return false;
