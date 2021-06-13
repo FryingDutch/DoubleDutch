@@ -46,5 +46,4 @@ Distributed locks are used for roughly [two reasons](https://martin.kleppmann.co
 When you're using LockManager for the latter reason, you cannot use LockManager in cluster mode. When employing LockerManager for efficiency reasons, though, you can easily spin up multiple instances (on different servers). In that case, you have to ensure that the clients are aware of all the hostnames. When one server is down, clients can try to acquire a lock at the 'next' LockManager instances. 
 
 ## Known issues and limitations
-- No current time out for the request on a lock, user has to define its own response to the situation.
 - No gracious way to exit the server, it has to be forced.
