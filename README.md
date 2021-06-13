@@ -12,11 +12,14 @@ r = requests.get("http://<host>:<port>/getLock/lock_as_string")
 # try to acquire the lock on the database with a custom lock lifetime(seconds)
 r = requests.get("http://<host>:<port>/getLock/lock_as_string/15")
 
-# if a lock is not yet available you can choose to wait
-while r.text == "false" or r.status_code != 200:
-       r = requests.get("http://<host>:<port>/getLock/lock_as_string")
-else:
-    key = r.text
+# if a lock is not yet available you can choose to wait (request timout - lock name - lock lifetime)
+r = requests.get("http://<host>:<port>/getLock/10/lock_as_string/15")
+
+OR (request timeout - lock name, default lock lifetime(30s))
+
+r = requests.get("http://<host>:<port>/getLock/10/lock_as_string")
+
+
 ```
  If the lock to the resource was granted, the client will receive a random unique string of 32 chararcters that will be needed to release the lock later.
  When using a Python Client, a request to release the lock may look like this:
