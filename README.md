@@ -15,7 +15,7 @@ r = requests.get("http://<host>:<port>/getLock/lock_as_string/15")
 # if a lock is not yet available you can choose to wait (request timout - lock name - lock lifetime)
 r = requests.get("http://<host>:<port>/getLock/10/lock_as_string/15")
 
-OR (request timeout - lock name, default lock lifetime(30s))
+#OR (request timeout - lock name, default lock lifetime(30s))
 
 r = requests.get("http://<host>:<port>/getLock/10/lock_as_string")
 
