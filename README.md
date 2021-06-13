@@ -21,7 +21,7 @@ r = requests.get("http://<host>:<port>/getLock/10/lock_as_string")
 
 
 ```
- If the lock to the resource was granted, the client will receive a random unique string of 32 chararcters that will be needed to release the lock later.
+ If the lock to the resource was granted, the client will receive a random string of 32 chararcters that will be needed to release the lock later.
  When using a Python Client, a request to release the lock may look like this:
 ```
 r = requests.get("http://<host>:<port>/releaseLock/lock_as_string/"+key)
