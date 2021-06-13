@@ -30,7 +30,7 @@ r = requests.get("http://<host>:<port>/releaseLock/lock_as_string/"+key)
 ## Installation and set-up
 DoubleDutch runs inside a Docker container. To build using the provided _.Dockerfile_:
 ```bash
-docker build . -t server .
+docker build . -t server
 ```
 To run and listen for connections on port 8000:
 ```
