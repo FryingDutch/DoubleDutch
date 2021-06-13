@@ -6,7 +6,6 @@
 
 namespace DoubleD
 {
-    bool LMserver::isRunning = true;
     std::vector<Lock> LMserver::m_lockVector;
     boost::mutex LMserver::m_storageMutex;
 
@@ -89,7 +88,6 @@ namespace DoubleD
                 });
 
         app.port(portNum).multithreaded().run();
-        LMserver::LMserver::isRunning = false;
     }
 
     std::string LMserver::m_createID()
