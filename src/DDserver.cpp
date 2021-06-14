@@ -9,15 +9,15 @@ namespace DoubleD
 {
     std::vector<Lock> DDserver::m_lockVector;
     boost::mutex DDserver::m_storageMutex;
+    bool DDserver::isRunning = true;
 
     DDserver::DDserver()
     {}
 
     void DDserver::m_startup(const unsigned int portNum) {
 
-        std::cout << std::this_thread::get_id() << "\n";
         crow::SimpleApp app;
-        CROW_ROUTE(app, "/")([]() { return "Welcome to LockManager"; });
+        CROW_ROUTE(app, "/")([]() { return "Welcome to DoubleDutch"; });
 
         // need to figure out how to return actual json
         CROW_ROUTE(app, "/status")
@@ -127,11 +127,12 @@ namespace DoubleD
                 });
 
         app.port(portNum).multithreaded().run();
+        DDserver::isRunning = false;
     }
 
     void DDserver::m_checkLifetimes()
     {
-        for (;;) 
+        while(DDserver::isRunning)
         {
             DDserver::m_storageMutex.lock(); 
                 for (unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
@@ -168,7 +169,6 @@ namespace DoubleD
             {
                 if (lockName == DDserver::m_lockVector[i].m_getName())
                 {
-
                     break;
                 }
 
