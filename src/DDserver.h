@@ -11,6 +11,7 @@ namespace DoubleD
 	class DDserver
 	{
 	private:
+		static bool isRunning;
 		static boost::mutex m_storageMutex;
 		static std::vector<Lock> m_lockVector;
 
