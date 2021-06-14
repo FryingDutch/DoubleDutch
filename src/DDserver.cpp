@@ -31,7 +31,7 @@ namespace DoubleD
             return tempString;
                 });
 
-        CROW_ROUTE(app, "/params")
+        CROW_ROUTE(app, "/getlock")
             ([](const crow::request& req)
                 {
                     std::string lockName;
