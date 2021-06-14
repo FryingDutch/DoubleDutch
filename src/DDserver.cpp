@@ -134,7 +134,6 @@ namespace DoubleD
         for (;;) 
         {
             DDserver::m_storageMutex.lock(); 
-            {
                 for (unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
                 {
                     if (DDserver::m_lockVector[i].m_expired())
@@ -143,7 +142,6 @@ namespace DoubleD
                         DDserver::m_lockVector.shrink_to_fit();
                     }
                 }
-            }
             DDserver::m_storageMutex.unlock();
         }        
     }
