@@ -31,101 +31,49 @@ namespace DoubleD
             return tempString;
                 });
 
-        // Getting the lock with a custom lock lifetime and a request timeout
-        CROW_ROUTE(app, "/getLock/<int>/<string>/<int>")
-            ([&](unsigned int timeout, std::string lockName, unsigned int lockLife) {
-            DDserver::m_storageMutex.lock();
-            for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
-                if (lockName == DDserver::m_lockVector[i].m_getName()) {
-                    if(DDserver::m_reqTimedout(timeout, lockName))
+        CROW_ROUTE(app, "/params")
+            ([](const crow::request& req)
+                {
+                    std::string lockName;
+                    double lifetime;
+                    double timeout;
+
+                    if (req.url_params.get("lockname") == nullptr)
                     {
-                        DDserver::m_storageMutex.unlock();
                         std::string ep = "false";
                         return ep;
                     }
-                }
-            }
-            Lock tempLock(lockName, lockLife);
-            DDserver::m_lockVector.push_back(tempLock);
 
-            DDserver::m_storageMutex.unlock();
-            return tempLock.m_getUser_id();
-                });
+                    else
+                    { lockName = req.url_params.get("lockname"); }
 
-        // Getting the lock with a default lock lifetime and a request timeout
-        CROW_ROUTE(app, "/getLock/<int>/<string>")
-            ([&](unsigned int timeout, std::string lockName) {
-            DDserver::m_storageMutex.lock();
-            for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
-                if (lockName == DDserver::m_lockVector[i].m_getName()) {
+                    if (req.url_params.get("lifetime") != nullptr)
+                    { lifetime = boost::lexical_cast<double>(req.url_params.get("lifetime")); }
+
+                    else
+                    { lifetime = 30.0f; }
+
+                    if (req.url_params.get("timeout") != nullptr)
+                    { timeout = boost::lexical_cast<double>(req.url_params.get("timeout")); }
+
+                    else
+                    { timeout = 0.0f; }
+
                     if (DDserver::m_reqTimedout(timeout, lockName))
                     {
-                        DDserver::m_storageMutex.unlock();
                         std::string ep = "false";
                         return ep;
                     }
-                }
-            }
-            Lock tempLock(lockName, 30.0f);
-            DDserver::m_lockVector.push_back(tempLock);
 
-            DDserver::m_storageMutex.unlock();
-            return tempLock.m_getUser_id();
-                });
+                    Lock tempLock(lockName, lifetime);
 
-        // Getting the lock with a custom lock lifetime
-        CROW_ROUTE(app, "/getLock/<string>/<int>")
-            ([&](std::string lockName, unsigned int lockLife) {
-            DDserver::m_storageMutex.lock();
-            for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
-                if (lockName == DDserver::m_lockVector[i].m_getName()) {
+                    DDserver::m_storageMutex.lock();
+                    DDserver::m_lockVector.push_back(tempLock);
                     DDserver::m_storageMutex.unlock();
-                    std::string ep = "false";
-                    return ep;
-                }
-            }
-            Lock tempLock(lockName, lockLife);
-            DDserver::m_lockVector.push_back(tempLock);
 
-            DDserver::m_storageMutex.unlock();
-            return tempLock.m_getUser_id();
+                    return tempLock.m_getUser_id();
                 });
-
-        // Getting the lock with a default lock lifetime (30s)
-        CROW_ROUTE(app, "/getLock/<string>")
-            ([&](std::string lockName) {
-            DDserver::m_storageMutex.lock();
-            for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
-                if (lockName == DDserver::m_lockVector[i].m_getName()) {
-                    DDserver::m_storageMutex.unlock();
-                    std::string ep = "false";
-                    return ep;
-                }
-            }
-            Lock tempLock(lockName, 30.0f);
-            DDserver::m_lockVector.push_back(tempLock);
-
-            DDserver::m_storageMutex.unlock();
-            return tempLock.m_getUser_id();
-                });
-
-        // Releasing the lock
-        CROW_ROUTE(app, "/releaseLock/<string>/<string>")
-            ([&](std::string lockName, std::string user_id) {
-            DDserver::m_storageMutex.lock();
-            for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
-                if (lockName == DDserver::m_lockVector[i].m_getName() &&
-                    user_id == DDserver::m_lockVector[i].m_getUser_id()) {
-                    DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
-                    DDserver::m_lockVector.shrink_to_fit();
-                    DDserver::m_storageMutex.unlock();
-                    return "released";
-                }
-            }
-            DDserver::m_storageMutex.unlock();
-            return "false";
-                });
-
+        
         app.port(portNum).multithreaded().run();
         DDserver::isRunning = false;
     }
@@ -149,8 +97,6 @@ namespace DoubleD
 
     bool DDserver::m_reqTimedout(unsigned int timeout, std::string lockName)
     {
-        DDserver::m_storageMutex.unlock();
-
         auto startTime = std::chrono::high_resolution_clock::now();
         auto currentTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> difference = currentTime - startTime;
@@ -159,12 +105,12 @@ namespace DoubleD
             currentTime = std::chrono::high_resolution_clock::now();
             difference = currentTime - startTime;
 
-            DDserver::m_storageMutex.lock();
             if (DDserver::m_lockVector.size() == 0)
             {
                 return false;
             }
 
+            DDserver::m_storageMutex.lock();
             for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
             {
                 if (lockName == DDserver::m_lockVector[i].m_getName())
@@ -174,12 +120,12 @@ namespace DoubleD
 
                 else if (i == DDserver::m_lockVector.size() - 1)
                 {
+                    DDserver::m_storageMutex.unlock();
                     return false;
                 }
             }
             DDserver::m_storageMutex.unlock();
         } 
-        DDserver::m_storageMutex.lock();
         return true;
     }    
 }
