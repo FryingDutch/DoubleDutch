@@ -31,7 +31,7 @@ namespace DoubleD
             return tempString;
                 });
 
-        CROW_ROUTE(app, "/getlock")
+        CROW_ROUTE(app, "/getLock")
             ([](const crow::request& req)
                 {
                     std::string lockName;
@@ -45,19 +45,29 @@ namespace DoubleD
                     }
 
                     else
-                    { lockName = req.url_params.get("lockname"); }
+                    {
+                        lockName = req.url_params.get("lockname");
+                    }
 
                     if (req.url_params.get("lifetime") != nullptr)
-                    { lifetime = boost::lexical_cast<double>(req.url_params.get("lifetime")); }
+                    {
+                        lifetime = boost::lexical_cast<double>(req.url_params.get("lifetime"));
+                    }
 
                     else
-                    { lifetime = 30.0f; }
+                    {
+                        lifetime = 30.0f;
+                    }
 
                     if (req.url_params.get("timeout") != nullptr)
-                    { timeout = boost::lexical_cast<double>(req.url_params.get("timeout")); }
+                    {
+                        timeout = boost::lexical_cast<double>(req.url_params.get("timeout"));
+                    }
 
                     else
-                    { timeout = 0.0f; }
+                    {
+                        timeout = 0.0f;
+                    }
 
                     if (DDserver::m_reqTimedout(timeout, lockName))
                     {
@@ -72,6 +82,23 @@ namespace DoubleD
                     DDserver::m_storageMutex.unlock();
 
                     return tempLock.m_getUser_id();
+                });
+
+        // Releasing the lock
+        CROW_ROUTE(app, "/releaseLock/<string>/<string>")
+            ([&](std::string lockName, std::string user_id) {
+            DDserver::m_storageMutex.lock();
+            for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
+                if (lockName == DDserver::m_lockVector[i].m_getName() &&
+                    user_id == DDserver::m_lockVector[i].m_getUser_id()) {
+                    DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
+                    DDserver::m_lockVector.shrink_to_fit();
+                    DDserver::m_storageMutex.unlock();
+                    return "released";
+                }
+            }
+            DDserver::m_storageMutex.unlock();
+            return "false";
                 });
         
         app.port(portNum).multithreaded().run();
