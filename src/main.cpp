@@ -18,7 +18,7 @@ bool isDigit(std::string str)
 
 int main(int argc, char* argv[]) 
 { 
-	if (argc > 1)
+	if (argc == 2)
 	{
 		if (isDigit(argv[1]))
 		{
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 		else { std::cout << "ERROR: Not a digit. Terminating...\n"; }
 	}
 
-	else { std::cout << "ERROR: No portnumber has been given. Terminating...\n"; }
+	else { std::cout << "ERROR: No valid argument([PORTNUM]) has been given. Terminating...\n"; }
 
 	return 0;
 }
