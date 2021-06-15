@@ -134,12 +134,13 @@ namespace DoubleD
         {
             currentTime = std::chrono::high_resolution_clock::now();
             difference = currentTime - startTime;
-
+            
+            DDserver::m_storageMutex.lock();
             if (DDserver::m_lockVector.size() == 0)
-            {
-                DDserver::m_storageMutex.lock();
+            {                
                 return false;
             }
+            DDserver::m_storageMutex.unlock();
 
             DDserver::m_storageMutex.lock();
             for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
