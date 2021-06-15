@@ -23,12 +23,13 @@ int main(int argc, char* argv[])
 		if (isDigit(argv[1]))
 		{
 			int port = std::stoi(argv[1]);
-			std::thread th1(&DoubleD::DDserver::m_startup, port);
-			DoubleD::DDserver::m_checkLifetimes();
-			th1.join();
+			if (port > 0)
+			{
+				std::thread th1(&DoubleD::DDserver::m_startup, port);
+				DoubleD::DDserver::m_checkLifetimes();
+				th1.join();
+			}
 		}
-
-		else { std::cout << "ERROR: Not a digit. Terminating...\n"; }
 	}
 
 	else { std::cout << "ERROR: No valid argument([PORTNUM]) has been given. Terminating...\n"; }
