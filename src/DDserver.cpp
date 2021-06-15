@@ -1,7 +1,6 @@
 #include <vector>
 #include <thread>
 #include <string>
-#include <random>
 #include "DDserver.h"
 #include "crow.h"
 #include <iostream>
@@ -70,19 +69,21 @@ namespace DoubleD
                         timeout = 0.0f;
                     }
 
+
                     if (DDserver::m_reqTimedout(timeout, lockName))
                     {
                         std::string ep = "false";
                         return ep;
                     }
 
-                    Lock tempLock(lockName, lifetime);
-
-                    DDserver::m_storageMutex.lock();
-                    DDserver::m_lockVector.push_back(tempLock);
-                    DDserver::m_storageMutex.unlock();
-
-                    return tempLock.m_getUser_id();
+                    else
+                    {
+                        Lock tempLock(lockName, lifetime);
+                        DDserver::m_lockVector.push_back(tempLock);
+                        DDserver::m_storageMutex.unlock();
+                        return tempLock.m_getUser_id();
+                    }        
+                    
                 });
 
         // Releasing the lock
@@ -136,6 +137,7 @@ namespace DoubleD
 
             if (DDserver::m_lockVector.size() == 0)
             {
+                DDserver::m_storageMutex.lock();
                 return false;
             }
 
@@ -148,8 +150,7 @@ namespace DoubleD
                 }
 
                 else if (i == DDserver::m_lockVector.size() - 1)
-                {
-                    DDserver::m_storageMutex.unlock();
+                {                    
                     return false;
                 }
             }
