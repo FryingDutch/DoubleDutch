@@ -1,4 +1,5 @@
 #include <vector>
+#include <thread>
 #include <string>
 #include <random>
 #include "DDserver.h"
@@ -100,7 +101,7 @@ namespace DoubleD
             DDserver::m_storageMutex.unlock();
             return "false";
                 });
-        
+
         app.port(portNum).multithreaded().run();
         DDserver::isRunning = false;
     }
@@ -109,6 +110,7 @@ namespace DoubleD
     {
         while(DDserver::isRunning)
         {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
             DDserver::m_storageMutex.lock(); 
                 for (unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
                 {
@@ -127,7 +129,7 @@ namespace DoubleD
         auto startTime = std::chrono::high_resolution_clock::now();
         auto currentTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> difference = currentTime - startTime;
-        while (difference.count() < timeout)
+        while (difference.count() <= timeout)
         {
             currentTime = std::chrono::high_resolution_clock::now();
             difference = currentTime - startTime;
@@ -152,6 +154,7 @@ namespace DoubleD
                 }
             }
             DDserver::m_storageMutex.unlock();
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
         } 
         return true;
     }    
