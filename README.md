@@ -25,7 +25,7 @@ docker build . -t server
 ```
 To run and listen for connections on port 8000:
 ```
-docker run -p 8000:8000 -it server /bin/bash
+docker run -p 8000:8000 server 8000
 ```
 
 
@@ -34,7 +34,8 @@ Distributed locks are used for roughly [two reasons](https://martin.kleppmann.co
 - **Efficiency**: Taking a lock saves you from unnecessarily doing the same work twice (e.g. some expensive computation).
 - **Correctness**: Taking a lock prevents concurrent processes from stepping on each others’ toes and messing up the state of your system.  
 
-When you're using LockManager for the latter reason, you cannot use LockManager in cluster mode. When employing LockerManager for efficiency reasons, though, you can easily spin up multiple instances (on different servers). In that case, you have to ensure that the clients are aware of all the hostnames. When one server is down, clients can try to acquire a lock at the 'next' LockManager instances. 
+When you're using DoubleDutch for the latter reason, you cannot use DoubleDutch in cluster mode. When employing DoubleDutch for efficiency reasons, though, you can easily spin up multiple instances (on different servers). In that case, you have to ensure that the clients are aware of all the hostnames. When one server is down, clients can try to acquire a lock at the 'next' DoubleDutch instances. 
 
 ## Known issues and limitations
 - No authentication build in
+- No gracious way to exit the server, it has to be forced.
