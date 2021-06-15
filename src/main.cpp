@@ -25,13 +25,15 @@ int main(int argc, char* argv[])
 			int port = std::stoi(argv[1]);
 			if (port > 0)
 			{
-				std::thread th1(&DoubleD::DDserver::m_startup, port);
-				DoubleD::DDserver::m_checkLifetimes();
-				th1.join();
+			std::thread th1(&DoubleD::DDserver::m_startup, port);
+			DoubleD::DDserver::m_checkLifetimes();
+			th1.join();
 			}
-		}
-	}
 
+			else { std::cout << "ERROR: Not a valid([UNSIGNED]) digit. Terminating...\n"; }
+		}
+		else { std::cout << "ERROR: Not a digit. Terminating...\n"; }
+	}
 	else { std::cout << "ERROR: No valid argument([PORTNUM]) has been given. Terminating...\n"; }
 
 	return 0;
