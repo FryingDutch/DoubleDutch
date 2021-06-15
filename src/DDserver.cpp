@@ -140,9 +140,7 @@ namespace DoubleD
             {                
                 return false;
             }
-            DDserver::m_storageMutex.unlock();
-
-            DDserver::m_storageMutex.lock();
+            
             for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
             {
                 if (lockName == DDserver::m_lockVector[i].m_getName())
