@@ -4,7 +4,7 @@
 #include <iostream>
 #include "DDserver.h"
 
-bool isString(std::string str)
+bool isDigit(std::string str)
 {
 	for (long unsigned int i = 0; i < str.length(); i++)
 	{
@@ -16,18 +16,22 @@ bool isString(std::string str)
 	return true;
 }
 
-int main() 
+int main(int argc, char* argv[]) 
 { 
-	std::string input;
+	if (argc > 1)
+	{
+		if (isDigit(argv[1]))
+		{
+			int port = std::stoi(argv[1]);
+			std::thread th1(&DoubleD::DDserver::m_startup, port);
+			DoubleD::DDserver::m_checkLifetimes();
+			th1.join();
+		}
 
-	do {
-		std::cout << "Choose a portnumber: ";
-		std::getline(std::cin, input);
-	} while (!isString(input));
+		else { std::cout << "ERROR: Not a digit. Terminating...\n"; }
+	}
 
-	int port = std::stoi(input);
+	else { std::cout << "ERROR: No portnumber has been given. Terminating...\n"; }
 
-	std::thread th1(&DoubleD::DDserver::m_startup, port); 
-	DoubleD::DDserver::m_checkLifetimes();
-	th1.join();
+	return 0;
 }
