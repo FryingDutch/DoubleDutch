@@ -23,7 +23,7 @@ DoubleDutch runs inside a Docker container. To build using the provided _.Docker
 ```bash
 docker build . -t server
 ```
-To run and listen for connections on port 8000 with default thread amount (hardware dependend):
+To run and listen for connections on port 8000 with default thread amount (8):
 ```
 docker run -p 8000:8000 server 8000
 ```
