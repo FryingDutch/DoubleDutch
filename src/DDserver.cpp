@@ -14,7 +14,7 @@ namespace DoubleD
     DDserver::DDserver()
     {}
 
-    void DDserver::m_startup(const unsigned int portNum) {
+    void DDserver::m_startup(const unsigned int portNum, const unsigned int numOfThreads) {
 
         crow::SimpleApp app;
         CROW_ROUTE(app, "/")([]() { return "Welcome to DoubleDutch"; });
@@ -82,8 +82,8 @@ namespace DoubleD
                         DDserver::m_lockVector.push_back(tempLock);
                         DDserver::m_storageMutex.unlock();
                         return tempLock.m_getUser_id();
-                    }        
-                    
+                    }
+
                 });
 
         // Releasing the lock
@@ -103,26 +103,26 @@ namespace DoubleD
             return "false";
                 });
 
-        app.port(portNum).multithreaded().run();
+        app.port(portNum).concurrency(numOfThreads).run();
         DDserver::isRunning = false;
     }
 
     void DDserver::m_checkLifetimes()
     {
-        while(DDserver::isRunning)
+        while (DDserver::isRunning)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            DDserver::m_storageMutex.lock(); 
-                for (unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
+            DDserver::m_storageMutex.lock();
+            for (unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
+            {
+                if (DDserver::m_lockVector[i].m_expired())
                 {
-                    if (DDserver::m_lockVector[i].m_expired())
-                    {
-                        DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
-                        DDserver::m_lockVector.shrink_to_fit();
-                    }
+                    DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
+                    DDserver::m_lockVector.shrink_to_fit();
                 }
+            }
             DDserver::m_storageMutex.unlock();
-        }        
+        }
     }
 
     bool DDserver::m_reqTimedout(unsigned int timeout, std::string lockName)
@@ -134,13 +134,13 @@ namespace DoubleD
         {
             currentTime = std::chrono::high_resolution_clock::now();
             difference = currentTime - startTime;
-            
+
             DDserver::m_storageMutex.lock();
             if (DDserver::m_lockVector.size() == 0)
-            {                
+            {
                 return false;
             }
-            
+
             for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
             {
                 if (lockName == DDserver::m_lockVector[i].m_getName())
@@ -149,13 +149,13 @@ namespace DoubleD
                 }
 
                 else if (i == DDserver::m_lockVector.size() - 1)
-                {                    
+                {
                     return false;
                 }
             }
             DDserver::m_storageMutex.unlock();
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        } 
+        }
         return true;
-    }    
+    }
 }
