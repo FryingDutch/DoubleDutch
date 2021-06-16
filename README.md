@@ -29,7 +29,7 @@ docker run -p 8000:8000 server 8000
 ```
 To run and listen for connections on port 8000 with 12 threads:
 ```
-docker run -p 8000:8000 server 80 12
+docker run -p 8000:8000 server 8000 12
 ```
 
 
