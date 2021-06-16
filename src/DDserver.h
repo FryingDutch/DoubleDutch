@@ -20,7 +20,7 @@ namespace DoubleD
 
 	public:
 		DDserver();
-		static void m_startup(const unsigned int portNum);
+		static void m_startup(const unsigned int portNum, const unsigned int numOfThreads);
 		static void m_checkLifetimes();
 	};
 }
