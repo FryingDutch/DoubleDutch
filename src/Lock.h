@@ -10,10 +10,8 @@ namespace DoubleD
     private:
         std::string m_name;
         std::string m_user_id;
-        std::chrono::_V2::system_clock::time_point m_start;
-
-    public:
         double m_lifeTime;
+        std::chrono::_V2::system_clock::time_point m_start;
 
     private:
         std::string m_createID();
