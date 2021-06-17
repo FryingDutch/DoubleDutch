@@ -37,21 +37,21 @@ int main(int argc, char* argv[])
 
 				else 
 				{ 
-					std::cout << "[ERROR]: Not a valid([UNSIGNED]) digit. Terminating...\n"; return 0; 
+					std::cout << "[ERROR]: Not a digit[THREADS]. Terminating...\n"; return 0; 
 				}
 				
 				if(numOfThreads < 1) 
 				{ 
-					std::cout << "[ERROR]: Not a valid([UNSIGNED]) digit. Terminating...\n"; return 0; 
+					std::cout << "[ERROR]: Need at least one thread! Terminating...\n" ; return 0; 
 				}
 
 				std::thread th1(&DoubleD::DDserver::m_startup, port, numOfThreads);
 				DoubleD::DDserver::m_checkLifetimes();
 				th1.join();
 			}
-			else { std::cout << "[ERROR]: Not a valid([UNSIGNED]) digit. Terminating...\n"; }
+			else { std::cout << "[ERROR]: Not a valid[UNSIGNED INT] digit[PORTNUM]. Terminating...\n"; }
 		}
-		else { std::cout << "[ERROR]: Not a digit. Terminating...\n"; }
+			else { std::cout << "[ERROR]: Not a digit[PORTNUM]. Terminating...\n"; }
 	}
 	else { std::cout << "[ERROR]: No valid argument([PORTNUM] ?[THREADS]) has been given. Terminating...\n"; }
 
