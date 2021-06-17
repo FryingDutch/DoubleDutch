@@ -18,14 +18,33 @@ bool isDigit(std::string str)
 
 int main(int argc, char* argv[]) 
 { 
-	if (argc == 2)
+	if (argc > 1 && argc < 4)
 	{
 		if (isDigit(argv[1]))
 		{
 			int port = std::stoi(argv[1]);
 			if (port > 0)
 			{
-				int numOfThreads = std::thread::hardware_concurrency();
+				int numOfThreads;
+				if (argc == 2)
+				{
+					numOfThreads = std::thread::hardware_concurrency();
+				}
+				else if(isDigit(argv[2]))
+				{
+					numOfThreads = std::stoi(argv[2]);
+				}
+
+				else 
+				{ 
+					std::cout << "[ERROR]: Not a valid([UNSIGNED]) digit. Terminating...\n"; return 0; 
+				}
+				
+				if(numOfThreads < 1) 
+				{ 
+					std::cout << "[ERROR]: Not a valid([UNSIGNED]) digit. Terminating...\n"; return 0; 
+				}
+
 				std::thread th1(&DoubleD::DDserver::m_startup, port, numOfThreads);
 				DoubleD::DDserver::m_checkLifetimes();
 				th1.join();
@@ -34,27 +53,7 @@ int main(int argc, char* argv[])
 		}
 		else { std::cout << "[ERROR]: Not a digit. Terminating...\n"; }
 	}
-
-	else if (argc == 3)
-	{
-		if (isDigit(argv[1]) && isDigit(argv[2]))
-		{
-			int port = std::stoi(argv[1]);
-			int numOfThreads = std::stoi(argv[2]);
-
-			if (port > 0 && numOfThreads > 0)
-			{				
-				std::thread th1(&DoubleD::DDserver::m_startup, port, numOfThreads);
-				DoubleD::DDserver::m_checkLifetimes();
-				th1.join();
-			}
-			else { std::cout << "[ERROR]: Not a valid([UNSIGNED]) digit. Terminating...\n"; }
-		}
-		else { std::cout << "[ERROR]: Not a digit. Terminating...\n"; }
-	}
-
-	else { std::cout << "[ERROR]: No valid argument([PORTNUM]) has been given. Terminating...\n"; }
-
+	else { std::cout << "[ERROR]: No valid argument([PORTNUM] ?[THREADS]) has been given. Terminating...\n"; }
 
 	return 0;
 }
