@@ -78,8 +78,9 @@ namespace DoubleD
 
                     else
                     {
-                        Lock tempLock(lockName, lifetime);
-                        DDserver::m_lockVector.push_back(tempLock);
+                        Lock *tempLock = new Lock(lockName, lifetime);
+                        DDserver::m_lockVector.push_back(*tempLock);
+                        delete tempLock;
                         DDserver::m_storageMutex.unlock();
                         return tempLock.m_getUser_id();
                     }
