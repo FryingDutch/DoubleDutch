@@ -7,7 +7,7 @@
 Any client that can communicate over http(s), can use the server. When using a Python client, a request to access the `database` resource may look like:
 ```python
 # try to acquire the lock on the database:
-r = requests.get("http://<host>:<port>/getLock/lockname='lock_as_string'&timeout=3&lifetime=20")
+r = requests.get("http://<host>:<port>/getLock?lockname=lock_as_string&timeout=3&lifetime=20")
 #-the default lifetime is 30 seconds.
 #-the default timeout is 0 seconds.
 
@@ -15,7 +15,7 @@ r = requests.get("http://<host>:<port>/getLock/lockname='lock_as_string'&timeout
  If the lock to the resource was granted, the client will receive a random string of 32 chararcters that will be needed to release the lock later.
  When using a Python Client, a request to release the lock may look like this:
 ```
-r = requests.get("http://<host>:<port>/releaseLock/lock_as_string/"+key)
+r = requests.get("http://<host>:<port>/releaseLock?lockname=lock_as_string&key="+key)
 ```
   
 ## Installation and set-up
