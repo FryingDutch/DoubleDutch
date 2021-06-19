@@ -1,6 +1,6 @@
 # DoubleDutch: a distributed advisory lock
 
-**DoubleDutch** is a C++ program that coordinates distributed access to shared resources, such as databases or file systems. Clients make requests to DoubleDutch, asking for exclusive usage of a resource (or permission to perform a one-time task). Once the client is finished (or timed-out), the lock is released and ready to be acquired by another client. This project is inspired by MySQL's `GET_LOCK` [function](https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock). DoubleDutch is a http server, based on [CrowCpp](https://github.com/CrowCpp/crow/tree/master). 
+**DoubleDutch** is a C++ program that coordinates distributed access to shared resources, such as databases or file systems. Clients make requests to DoubleDutch, asking for exclusive usage of a resource (or permission to perform a one-time task). Once the client is finished (or timed-out), the lock is released and ready to be acquired by another client. This project is inspired by MySQL's `GET_LOCK` [function](https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock). DoubleDutch is a https server, based on [CrowCpp](https://github.com/CrowCpp/crow/tree/master). 
 
 
 ## Usage
@@ -19,6 +19,7 @@ r = requests.get("http://<host>:<port>/releaseLock/lock_as_string/"+key)
 ```
   
 ## Installation and set-up
+DoubleDutch needs a .crt file named "certificate.crt" and a .key file named "privateKey.key" to be placed in the "src" folder, in order to run.  
 DoubleDutch runs inside a Docker container. To build using the provided _.Dockerfile_:
 ```bash
 docker build . -t server
