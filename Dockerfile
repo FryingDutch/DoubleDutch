@@ -3,8 +3,9 @@ FROM ubuntu:latest
 
 # install cmake, gcc, g++, boost, and git
 RUN apt-get update
-RUN apt-get install -yq cmake gcc g++ 
+RUN apt-get install -yq cmake gcc g++
 RUN apt-get install -yq libboost-all-dev
+RUN apt-get install libssl-dev
 RUN apt-get install -yq git
 
 # get crow's include/ dir
@@ -24,7 +25,3 @@ RUN make
 
 # run the app!
 ENTRYPOINT ["src/server"]
-
-
-
-
