@@ -90,10 +90,23 @@ namespace DoubleD
                 });
 
         // Releasing the lock
-        CROW_ROUTE(app, "/releaseLock/<string>/<string>")
-            ([&](std::string lockName, std::string user_id) {
+        CROW_ROUTE(app, "/releaseLock")
+            ([&](const crow::request& req) {
+            std::string lockName, user_id;
+            if (req.url_params.get("lockname") == nullptr || req.url_params.get("key") == nullptr)
+            {
+                return "false";
+            }
+
+            else
+            {
+                lockName = req.url_params.get("lockname");
+                user_id = req.url_params.get("key");
+            }
+
             DDserver::m_storageMutex.lock();
             for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
+                
                 if (lockName == DDserver::m_lockVector[i].m_getName() &&
                     user_id == DDserver::m_lockVector[i].m_getUser_id()) {
                     DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
@@ -134,11 +147,8 @@ namespace DoubleD
         auto startTime = std::chrono::high_resolution_clock::now();
         auto currentTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> difference = currentTime - startTime;
-        while (difference.count() <= timeout)
+        do
         {
-            currentTime = std::chrono::high_resolution_clock::now();
-            difference = currentTime - startTime;
-
             DDserver::m_storageMutex.lock();
             if (DDserver::m_lockVector.size() == 0)
             {
@@ -158,8 +168,16 @@ namespace DoubleD
                 }
             }
             DDserver::m_storageMutex.unlock();
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        }
+
+            currentTime = std::chrono::high_resolution_clock::now();
+            difference = currentTime - startTime;
+
+            if (difference.count() < timeout)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            }            
+
+        } while (difference.count() < timeout);
         return true;
     }
 }
