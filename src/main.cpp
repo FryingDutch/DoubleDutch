@@ -1,4 +1,3 @@
-#define CROW_MAIN 
 #include <thread>
 #include <string>
 #include <iostream>
@@ -16,9 +15,9 @@ bool isDigit(std::string str)
 	return true;
 }
 
-int main(int argc, char* argv[]) 
-{ 
-	if (argc > 1 && argc < 4)
+int main(int argc, char* argv[])
+{
+	if (argc == 2 || argc == 3)
 	{
 		if (isDigit(argv[1]))
 		{
@@ -30,28 +29,28 @@ int main(int argc, char* argv[])
 				{
 					numOfThreads = std::thread::hardware_concurrency();
 				}
-				else if(isDigit(argv[2]))
+				else if (isDigit(argv[2]))
 				{
 					numOfThreads = std::stoi(argv[2]);
 				}
 
-				else 
-				{ 
-					std::cout << "[ERROR]: Not a digit[THREADS]. Terminating...\n"; return 0; 
-				}
-				
-				if(numOfThreads < 1) 
-				{ 
-					std::cout << "[ERROR]: Need at least one thread! Terminating...\n" ; return 0; 
+				else
+				{
+					std::cout << "[ERROR]: Not a digit[THREADS]. Terminating...\n"; return 0;
 				}
 
-				std::thread th1(&DoubleD::DDserver::m_startup, port, numOfThreads);
-				DoubleD::DDserver::m_checkLifetimes();
+				if (numOfThreads < 1)
+				{
+					std::cout << "[ERROR]: Need at least one thread! Terminating...\n"; return 0;
+				}
+
+				std::thread th1(&DoubleD::DDserver::m_checkLifetimes);
+				DoubleD::DDserver::m_startup(port, numOfThreads);
 				th1.join();
 			}
 			else { std::cout << "[ERROR]: Not a valid[UNSIGNED INT] digit[PORTNUM]. Terminating...\n"; }
 		}
-			else { std::cout << "[ERROR]: Not a digit[PORTNUM]. Terminating...\n"; }
+		else { std::cout << "[ERROR]: Not a digit[PORTNUM]. Terminating...\n"; }
 	}
 	else { std::cout << "[ERROR]: No valid argument([PORTNUM] ?[THREADS]) has been given. Terminating...\n"; }
 
