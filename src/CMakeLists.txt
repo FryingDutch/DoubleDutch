@@ -6,6 +6,8 @@ add_executable(server
 		lock.cpp
 		DDserver.cpp
 		)
+target_link_libraries(server OpenSSL::SSL)
 target_link_libraries(server ${Boost_LIBRARIES})
 target_link_libraries(server ${CMAKE_THREAD_LIBS_INIT})
+
 
