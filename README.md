@@ -19,7 +19,7 @@ r = requests.get("http://<host>:<port>/releaseLock/lock_as_string/"+key)
 ```
   
 ## Installation and set-up
-DoubleDutch needs a .crt file named "certificate.crt" and a .key file named "privateKey.key" to be placed in the "src" folder, in order to run.  
+DoubleDutch needs a .crt file named "certificate.crt" and a .key file named "privateKey.key", in order to run.  
 DoubleDutch runs inside a Docker container. To build using the provided _.Dockerfile_:
 ```bash
 docker build . -t server
