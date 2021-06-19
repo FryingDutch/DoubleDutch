@@ -1,9 +1,12 @@
-#include <vector>
-#include <thread>
-#include <string>
-#include "DDserver.h"
+#define CROW_MAIN 
+#define CROW_ENABLE_SSL
 #include "crow.h"
 #include <iostream>
+#include <string>
+#include <vector>
+#include <thread>
+#include "DDserver.h"
+
 
 namespace DoubleD
 {
@@ -103,7 +106,8 @@ namespace DoubleD
             return "false";
                 });
 
-        app.port(portNum).concurrency(numOfThreads).run();
+        //app.server_name("Name");
+        app.port(portNum).ssl_file("../src/certificate.crt", "../src/privateKey.key").concurrency(numOfThreads).run();
         DDserver::isRunning = false;
     }
 
