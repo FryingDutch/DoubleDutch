@@ -28,7 +28,7 @@ namespace DoubleD
             std::string tempString;
             for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
                 tempString = tempString + "LOCK= " + DDserver::m_lockVector[i].m_getName() +
-                    "\n" + "USER_ID= " + DDserver::m_lockVector[i].m_getUser_id() +
+                    "\n" + "USER_ID= " + DDserver::m_lockVector[i].m_getSessionToken() +
                     "\n\n";
             }
             return tempString;
@@ -91,7 +91,7 @@ namespace DoubleD
                         Lock tempLock(lockName, lifetime);
                         DDserver::m_lockVector.push_back(tempLock);
                         DDserver::m_storageMutex.unlock();
-                        return crow::response(tempLock.m_getUser_id());
+                        return crow::response(tempLock.m_getSessionToken());
                     }
 
                 });
@@ -115,7 +115,7 @@ namespace DoubleD
             for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
                 
                 if (lockName == DDserver::m_lockVector[i].m_getName() &&
-                    user_id == DDserver::m_lockVector[i].m_getUser_id()) {
+                    user_id == DDserver::m_lockVector[i].m_getSessionToken()) {
                     DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
                     DDserver::m_lockVector.shrink_to_fit();
                     DDserver::m_storageMutex.unlock();
@@ -199,15 +199,7 @@ namespace DoubleD
             std::getline(file, tempStr);
             file.close();
 
-            if (tempStr == key)
-            {
-                return true;
-            }
-
-            else 
-            {
-                return false;
-            }
+            return tempStr == key;
         }
 
         else
