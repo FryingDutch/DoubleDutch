@@ -7,7 +7,7 @@
 Any client that can communicate over http(s), can use the server. When using a Python client, a request to access the `database` resource may look like:
 ```python
 # try to acquire the lock on the database:
-r = requests.get("https://<host>:<port>/getLock?lockname=lock_as_string&timeout=3&lifetime=20")
+r = requests.get("https://<host>:<port>/getLock?auth=randomapikey&lockname=lock_as_string&timeout=3&lifetime=20")
 #-the default lifetime is 30 seconds.
 #-the default timeout is 0 seconds.
 
@@ -19,7 +19,11 @@ r = requests.get("https://<host>:<port>/releaseLock?lockname=lock_as_string&key=
 ```
   
 ## Installation and set-up
-DoubleDutch needs a .crt file named "certificate.crt" and a .key file named "privateKey.key", in order to run.  
+DoubleDutch needs a .crt file named "certificate.crt" and a .key file named "privateKey.key", in order to run. 
+You will have to place these files in the SSL directory.
+
+The program also uses authentication trough API Key verification. To set the API key, you just edit the config.txt file.
+
 DoubleDutch runs inside a Docker container. To build using the provided _.Dockerfile_:
 ```bash
 docker build . -t server
