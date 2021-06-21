@@ -22,29 +22,40 @@ namespace DoubleD
         crow::SimpleApp app;
         CROW_ROUTE(app, "/")([]() { return "Welcome to DoubleDutch"; });
 
-        // need to figure out how to return actual json
         CROW_ROUTE(app, "/status")
             ([&] {
-            std::string tempString;
-            for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
-                tempString = tempString + "LOCK= " + DDserver::m_lockVector[i].m_getName() +
-                    "\n" + "USER_ID= " + DDserver::m_lockVector[i].m_getSessionToken() +
-                    "\n\n";
+            crow::json::wvalue x;
+
+            DDserver::m_storageMutex.lock();
+            if (DDserver::m_lockVector.size() != 0)
+            {
+                for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
+                    x["Locks"][i]["Name"] = DDserver::m_lockVector[i].m_getName();
+                    x["Locks"][i]["Token"] = DDserver::m_lockVector[i].m_getSessionToken();
+                    x["Locks"][i]["Time Left"] = DDserver::m_lockVector[i].m_timeLeft();
+                }
+                DDserver::m_storageMutex.unlock();
+                return crow::response(200, x);
             }
-            return tempString;
-                });
+            else 
+            { 
+                x["Status"] = false; 
+                DDserver::m_storageMutex.unlock(); 
+                return crow::response(401, x); }
+            });
 
         CROW_ROUTE(app, "/getLock")
             ([&](const crow::request& req)
-                {   
-                    std::string ep = "false";
+            {
+                    crow::json::wvalue x;
+                    x["status"] = "false";
 
                     std::string lockName;
                     double lifetime, timeout;
 
                     if (req.url_params.get("lockname") == nullptr || req.url_params.get("auth") == nullptr)
-                    {                        
-                        return crow::response(401, ep);
+                    {
+                        return crow::response(401, x);
                     }
 
                     else
@@ -56,7 +67,7 @@ namespace DoubleD
 
                         else
                         {
-                            return crow::response(401, ep);
+                            return crow::response(401, x);
                         }
                     }
 
@@ -83,7 +94,7 @@ namespace DoubleD
 
                     if (DDserver::m_reqTimedout(timeout, lockName, PRECISION))
                     {
-                        return crow::response(401, ep);
+                        return crow::response(401, x);
                     }
 
                     else
@@ -91,18 +102,20 @@ namespace DoubleD
                         Lock tempLock(lockName, lifetime);
                         DDserver::m_lockVector.push_back(tempLock);
                         DDserver::m_storageMutex.unlock();
-                        return crow::response(tempLock.m_getSessionToken());
+                        x["status"] = tempLock.m_getSessionToken();
+                        return crow::response(200, x);
                     }
-
-                });
+            });
 
         // Releasing the lock
         CROW_ROUTE(app, "/releaseLock")
             ([&](const crow::request& req) {
             std::string lockName, user_id;
+            crow::json::wvalue x;
+            x["status"] = "false";
             if (req.url_params.get("lockname") == nullptr || req.url_params.get("key") == nullptr)
             {
-                return crow::response(401, "false");
+                return crow::response(401, x);
             }
 
             else
@@ -119,11 +132,12 @@ namespace DoubleD
                     DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
                     DDserver::m_lockVector.shrink_to_fit();
                     DDserver::m_storageMutex.unlock();
-                    return crow::response("released");
+                    x["status"] = "released";
+                    return crow::response(200, x);
                 }
             }
             DDserver::m_storageMutex.unlock();
-            return crow::response(401, "false");
+            return crow::response(401, x);
                 });
 
         std::thread th1(&DDserver::m_checkLifetimes, PRECISION);
