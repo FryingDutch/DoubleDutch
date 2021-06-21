@@ -8,15 +8,15 @@ namespace DoubleD
 		: m_name(_name), m_lifeTime(_lifeTime)
 	{
 		m_start = std::chrono::high_resolution_clock::now();
-		m_user_id = Lock::m_createID();
+		m_session_token = Lock::m_createToken();
 	}
 
-	std::string Lock::m_createID()
+	std::string Lock::m_createToken()
 	{
 		static std::string str =
 			"01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-		std::random_device rd;
-		std::mt19937 generator(rd());
+		static std::random_device rd;
+		static std::mt19937 generator(rd());
 		std::shuffle(str.begin(), str.end(), generator);
 
 		return str.substr(0, 32);
@@ -34,5 +34,5 @@ namespace DoubleD
 	}
 
 	std::string Lock::m_getName() { return this->m_name; }
-	std::string Lock::m_getUser_id() { return this->m_user_id; }
+	std::string Lock::m_getSessionToken() { return this->m_session_token; }
 }
