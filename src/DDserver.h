@@ -17,11 +17,12 @@ namespace DoubleD
 
 	private:
 		static bool m_reqTimedout(unsigned int timeout, std::string lockName);
+		static void m_checkLifetimes();
+		static bool m_keyVerified(std::string key);
 
 	public:
 		DDserver();
-		static void m_startup(const unsigned int portNum, const unsigned int numOfThreads);
-		static void m_checkLifetimes();
+		static void m_startup(const unsigned int portNum, const unsigned int numOfThreads);		
 	};
 }
 
