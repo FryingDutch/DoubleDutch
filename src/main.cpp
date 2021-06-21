@@ -15,42 +15,82 @@ bool isDigit(std::string str)
 	return true;
 }
 
+//Need to reduce the amount of code
 int main(int argc, char* argv[])
 {
-	if (argc == 2 || argc == 3)
+	int port;
+	int precision = 333; 
+	int threads = std::thread::hardware_concurrency();
+	switch (argc)
 	{
+	case 2:
 		if (isDigit(argv[1]))
 		{
-			int port = std::stoi(argv[1]);
-			if (port > 0)
+			port = std::stoi(argv[1]);
+
+			if (port > 0 && threads > 0 && precision > 0)
 			{
-				int numOfThreads;
-				if (argc == 2)
-				{
-					numOfThreads = std::thread::hardware_concurrency();
-				}
-				else if (isDigit(argv[2]))
-				{
-					numOfThreads = std::stoi(argv[2]);
-				}
-
-				else
-				{
-					std::cout << "[ERROR]: Not a digit[THREADS]. Terminating...\n"; return 0;
-				}
-
-				if (numOfThreads < 1)
-				{
-					std::cout << "[ERROR]: Need at least one thread! Terminating...\n"; return 0;
-				}
-
-				DoubleD::DDserver::m_startup(port, numOfThreads);
+				DoubleD::DDserver::m_startup(port, threads, precision);
 			}
-			else { std::cout << "[ERROR]: Not a valid[UNSIGNED INT] digit[PORTNUM]. Terminating...\n"; }
 		}
-		else { std::cout << "[ERROR]: Not a digit[PORTNUM]. Terminating...\n"; }
+		break;
+
+	case 3:
+		if (isDigit(argv[1]) && isDigit(argv[2]))
+		{
+			port = std::stoi(argv[1]);
+			threads = std::stoi(argv[2]);
+
+			if (port > 0 && threads > 0 && precision > 0)
+			{
+				DoubleD::DDserver::m_startup(port, threads, precision);
+			}
+		}		
+		break;
+
+	case 4:
+		if (isDigit(argv[1]) && *argv[2] == 'p' && isDigit(argv[3]))
+		{
+			port = std::stoi(argv[1]);
+			precision = std::stoi(argv[3]);
+
+			if (port > 0 && threads > 0 && precision > 0)
+			{
+				DoubleD::DDserver::m_startup(port, threads, precision);
+			}
+		}
+		break;
+
+	case 5:
+		if (isDigit(argv[1]) && *argv[2] == 'p' && isDigit(argv[3]) && isDigit(argv[4]))
+		{
+			port = std::stoi(argv[1]);
+			precision = std::stoi(argv[3]);
+			threads = std::stoi(argv[4]);
+
+			if (port > 0 && threads > 0 && precision > 0)
+			{
+				DoubleD::DDserver::m_startup(port, threads, precision);
+			}
+		}
+
+		else if (isDigit(argv[1]) && isDigit(argv[2]) && *argv[3] == 'p' && isDigit(argv[4]))
+		{
+			port = std::stoi(argv[1]);
+			precision = std::stoi(argv[4]);
+			threads = std::stoi(argv[2]);
+
+			if (port > 0 && threads > 0 && precision > 0)
+			{
+				DoubleD::DDserver::m_startup(port, threads, precision);
+			}
+		}
+		break;
+
+	default:
+		break;
+
 	}
-	else { std::cout << "[ERROR]: No valid argument([PORTNUM] ?[THREADS]) has been given. Terminating...\n"; }
 
 	return 0;
 }
