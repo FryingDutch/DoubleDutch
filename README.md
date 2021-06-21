@@ -46,5 +46,4 @@ Distributed locks are used for roughly [two reasons](https://martin.kleppmann.co
 When you're using DoubleDutch for the latter reason, you cannot use DoubleDutch in cluster mode. When employing DoubleDutch for efficiency reasons, though, you can easily spin up multiple instances (on different servers). In that case, you have to ensure that the clients are aware of all the hostnames. When one server is down, clients can try to acquire a lock at the 'next' DoubleDutch instances. 
 
 ## Known issues and limitations
-- No authentication build in
-- No gracious way to exit the server, it has to be forced.
+- No way to signal (Ctrl + c) the server to stop. Can stop running by closing the terminal. (The exit protocols will still run that way).
