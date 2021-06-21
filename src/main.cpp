@@ -1,6 +1,6 @@
-#include <thread>
 #include <string>
 #include <iostream>
+#include <thread>
 #include "DDserver.h"
 
 bool isDigit(std::string str)
@@ -44,9 +44,7 @@ int main(int argc, char* argv[])
 					std::cout << "[ERROR]: Need at least one thread! Terminating...\n"; return 0;
 				}
 
-				std::thread th1(&DoubleD::DDserver::m_checkLifetimes);
 				DoubleD::DDserver::m_startup(port, numOfThreads);
-				th1.join();
 			}
 			else { std::cout << "[ERROR]: Not a valid[UNSIGNED INT] digit[PORTNUM]. Terminating...\n"; }
 		}
