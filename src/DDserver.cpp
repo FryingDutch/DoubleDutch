@@ -2,11 +2,11 @@
 #define CROW_ENABLE_SSL
 #include "crow.h"
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <thread>
 #include "DDserver.h"
-
 
 namespace DoubleD
 {
@@ -37,19 +37,29 @@ namespace DoubleD
         CROW_ROUTE(app, "/getLock")
             ([](const crow::request& req)
                 {
-                    std::string lockName;
-                    double lifetime;
-                    double timeout;
+                    std::string ep = "false";
 
-                    if (req.url_params.get("lockname") == nullptr)
-                    {
-                        std::string ep = "false";
+                    std::string lockName;
+                    double lifetime, timeout;
+
+                    if (req.url_params.get("lockname") == nullptr || req.url_params.get("auth") == nullptr)
+                    {                        
+                        ep = "Lockname or auth not found";
                         return ep;
                     }
 
                     else
                     {
-                        lockName = req.url_params.get("lockname");
+                        if (DDserver::m_keyVerified(req.url_params.get("auth")))
+                        {
+                            lockName = req.url_params.get("lockname");
+                        }
+
+                        else
+                        {
+                            ep = req.url_params.get("auth");
+                            return ep;
+                        }
                     }
 
                     if (req.url_params.get("lifetime") != nullptr)
@@ -75,8 +85,8 @@ namespace DoubleD
 
                     if (DDserver::m_reqTimedout(timeout, lockName))
                     {
-                        std::string ep = "false";
-                        return ep;
+                        ep = "timed out";
+                         return ep;
                     }
 
                     else
@@ -119,16 +129,17 @@ namespace DoubleD
             return "false";
                 });
 
-        //app.server_name("Name");
-        app.port(portNum).ssl_file("../src/certificate.crt", "../src/privateKey.key").concurrency(numOfThreads).run();
+        std::thread th1(&DDserver::m_checkLifetimes);
+        app.port(portNum).ssl_file("../SSL/certificate.crt", "../SSL/privateKey.key").concurrency(numOfThreads).run();
         DDserver::isRunning = false;
+        th1.join();        
     }
 
     void DDserver::m_checkLifetimes()
     {
         while (DDserver::isRunning)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::milliseconds(333));
             DDserver::m_storageMutex.lock();
             for (unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
             {
@@ -174,10 +185,37 @@ namespace DoubleD
 
             if (difference.count() < timeout)
             {
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                std::this_thread::sleep_for(std::chrono::milliseconds(333));
             }            
 
         } while (difference.count() < timeout);
         return true;
+    }
+
+    bool DDserver::m_keyVerified(std::string key)
+    {
+        std::ifstream file("../config.txt", std::ios::in);
+
+        if (file.is_open())
+        {
+            std::string tempStr;
+            std::getline(file, tempStr);
+            file.close();
+
+            if (tempStr == key)
+            {
+                return true;
+            }
+
+            else 
+            {
+                return false;
+            }
+        }
+
+        else
+        {
+            return false;
+        }
     }
 }
