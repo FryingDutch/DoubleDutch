@@ -31,15 +31,26 @@ DoubleDutch runs inside a Docker container. To build using the provided _.Docker
 ```bash
 docker build . -t server
 ```
-To run and listen for connections on port 8000 with default thread amount (8):
+To run and listen for connections on port 8000 with default thread amount (8) and default precision(333ms):
 ```
 docker run -p 8000:8000 server 8000
 ```
-To run and listen for connections on port 8000 with 12 threads:
+To run and listen for connections on port 8000 with 12 threads and default precision(333ms):
 ```
 docker run -p 8000:8000 server 8000 12
 ```
 
+To run and listen for connections on port 8000 with default thread amount (8) and custom precision(ms):
+```
+docker run -p 8000:8000 server 8000 p 100
+```
+
+To run and listen for connections on port 8000 with custom thread amount and custom precision(ms):
+```
+docker run -p 8000:8000 server 8000 p 100 15
+#OR
+docker run -p 8000:8000 server 8000 15 p 100
+```
 
 ## Cluster mode
 Distributed locks are used for roughly [two reasons](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html):
