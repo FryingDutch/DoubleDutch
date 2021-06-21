@@ -12,12 +12,12 @@ namespace DoubleD
 {
     std::vector<Lock> DDserver::m_lockVector;
     boost::mutex DDserver::m_storageMutex;
-    bool DDserver::isRunning = true;
+    bool DDserver::m_isRunning = true;
 
     DDserver::DDserver()
     {}
 
-    void DDserver::m_startup(const unsigned int portNum, const unsigned int numOfThreads) {
+    void DDserver::m_startup(const unsigned int PORTNUM, const unsigned int NUMOFTHREADS, const unsigned int PRECISION) {
 
         crow::SimpleApp app;
         CROW_ROUTE(app, "/")([]() { return "Welcome to DoubleDutch"; });
@@ -35,7 +35,7 @@ namespace DoubleD
                 });
 
         CROW_ROUTE(app, "/getLock")
-            ([](const crow::request& req)
+            ([&](const crow::request& req)
                 {   
                     std::string ep = "false";
 
@@ -81,7 +81,7 @@ namespace DoubleD
                     }
 
 
-                    if (DDserver::m_reqTimedout(timeout, lockName))
+                    if (DDserver::m_reqTimedout(timeout, lockName, PRECISION))
                     {
                         return crow::response(401, ep);
                     }
@@ -126,17 +126,17 @@ namespace DoubleD
             return crow::response(401, "false");
                 });
 
-        std::thread th1(&DDserver::m_checkLifetimes);
-        app.port(portNum).ssl_file("../SSL/certificate.crt", "../SSL/privateKey.key").concurrency(numOfThreads).run();
-        DDserver::isRunning = false;
+        std::thread th1(&DDserver::m_checkLifetimes, PRECISION);
+        app.port(PORTNUM).ssl_file("../SSL/certificate.crt", "../SSL/privateKey.key").concurrency(NUMOFTHREADS).run();
+        DDserver::m_isRunning = false;
         th1.join();        
     }
 
-    void DDserver::m_checkLifetimes()
+    void DDserver::m_checkLifetimes(const unsigned int PRECISION)
     {
-        while (DDserver::isRunning)
+        while (DDserver::m_isRunning)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(333));
+            std::this_thread::sleep_for(std::chrono::milliseconds(PRECISION));
             DDserver::m_storageMutex.lock();
             for (unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
             {
@@ -150,7 +150,7 @@ namespace DoubleD
         }
     }
 
-    bool DDserver::m_reqTimedout(unsigned int timeout, std::string lockName)
+    bool DDserver::m_reqTimedout(const unsigned int TIMEOUT, std::string lockName, const unsigned int PRECISION)
     {
         auto startTime = std::chrono::high_resolution_clock::now();
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -180,12 +180,12 @@ namespace DoubleD
             currentTime = std::chrono::high_resolution_clock::now();
             difference = currentTime - startTime;
 
-            if (difference.count() < timeout)
+            if (difference.count() < TIMEOUT)
             {
-                std::this_thread::sleep_for(std::chrono::milliseconds(333));
+                std::this_thread::sleep_for(std::chrono::milliseconds(PRECISION));
             }            
 
-        } while (difference.count() < timeout);
+        } while (difference.count() < TIMEOUT);
         return true;
     }
 
