@@ -36,7 +36,7 @@ namespace DoubleD
 
         CROW_ROUTE(app, "/getLock")
             ([](const crow::request& req)
-                {
+                {   
                     std::string ep = "false";
 
                     std::string lockName;
@@ -44,8 +44,7 @@ namespace DoubleD
 
                     if (req.url_params.get("lockname") == nullptr || req.url_params.get("auth") == nullptr)
                     {                        
-                        ep = "Lockname or auth not found";
-                        return ep;
+                        return crow::response(401, ep);
                     }
 
                     else
@@ -57,8 +56,7 @@ namespace DoubleD
 
                         else
                         {
-                            ep = req.url_params.get("auth");
-                            return ep;
+                            return crow::response(401, ep);
                         }
                     }
 
@@ -85,8 +83,7 @@ namespace DoubleD
 
                     if (DDserver::m_reqTimedout(timeout, lockName))
                     {
-                        ep = "timed out";
-                         return ep;
+                        return crow::response(401, ep);
                     }
 
                     else
@@ -94,7 +91,7 @@ namespace DoubleD
                         Lock tempLock(lockName, lifetime);
                         DDserver::m_lockVector.push_back(tempLock);
                         DDserver::m_storageMutex.unlock();
-                        return tempLock.m_getUser_id();
+                        return crow::response(tempLock.m_getUser_id());
                     }
 
                 });
@@ -105,7 +102,7 @@ namespace DoubleD
             std::string lockName, user_id;
             if (req.url_params.get("lockname") == nullptr || req.url_params.get("key") == nullptr)
             {
-                return "false";
+                return crow::response(401, "false");
             }
 
             else
@@ -122,11 +119,11 @@ namespace DoubleD
                     DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
                     DDserver::m_lockVector.shrink_to_fit();
                     DDserver::m_storageMutex.unlock();
-                    return "released";
+                    return crow::response("released");
                 }
             }
             DDserver::m_storageMutex.unlock();
-            return "false";
+            return crow::response(401, "false");
                 });
 
         std::thread th1(&DDserver::m_checkLifetimes);
