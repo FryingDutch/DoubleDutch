@@ -11,18 +11,18 @@ namespace DoubleD
 	class DDserver
 	{
 	private:
-		static bool isRunning;
+		static bool m_isRunning;
 		static boost::mutex m_storageMutex;
 		static std::vector<Lock> m_lockVector;
 
 	private:
-		static bool m_reqTimedout(unsigned int timeout, std::string lockName);
-		static void m_checkLifetimes();
+		static bool m_reqTimedout(unsigned int timeout, std::string lockName, const unsigned int PRECISION);
+		static void m_checkLifetimes(const unsigned int PRECISION);
 		static bool m_keyVerified(std::string key);
 
 	public:
 		DDserver();
-		static void m_startup(const unsigned int portNum, const unsigned int numOfThreads);		
+		static void m_startup(const unsigned int PORTNUM, const unsigned int NUMOFTHREADS, const unsigned int PRECISION);		
 	};
 }
 
