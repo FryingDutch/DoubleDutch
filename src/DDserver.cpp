@@ -39,16 +39,17 @@ namespace DoubleD
             }
             else 
             { 
-                x["Status"] = false; 
+                x["status"] = false; 
                 DDserver::m_storageMutex.unlock(); 
-                return crow::response(401, x); }
+                return crow::response(401, x); 
+            }
             });
 
         CROW_ROUTE(app, "/getLock")
             ([&](const crow::request& req)
             {
                     crow::json::wvalue x;
-                    x["status"] = "false";
+                    x["status"] = false;
 
                     std::string lockName;
                     double lifetime, timeout;
@@ -112,7 +113,7 @@ namespace DoubleD
             ([&](const crow::request& req) {
             std::string lockName, user_id;
             crow::json::wvalue x;
-            x["status"] = "false";
+            x["status"] = false;
             if (req.url_params.get("lockname") == nullptr || req.url_params.get("key") == nullptr)
             {
                 return crow::response(401, x);
