@@ -8,6 +8,9 @@ Any client that can communicate over http(s), can use the server. When using a P
 ```python
 # try to acquire the lock on the database:
 r = requests.get("https://<host>:<port>/getLock?auth=randomapikey&lockname=lock_as_string&timeout=3&lifetime=20")
+
+#OR
+r = requests.get("https://<host>:<port>/getLock?auth=randomapikey&lockname=lock_as_string")
 #-the default lifetime is 30 seconds.
 #-the default timeout is 0 seconds.
 
