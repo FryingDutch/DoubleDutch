@@ -39,6 +39,7 @@ To run and listen for connections on port 8000 with 12 threads and default preci
 ```
 docker run -p 8000:8000 server 8000 12
 ```
+DoubleDutch allows you to change the precision of the application. This effects the time between each cycle in which the program looks for a free lock, or if a lock lifetime has been expired. At default, the application does 3 cycles each second(333ms) for both of these functions.
 
 To run and listen for connections on port 8000 with default thread amount (8) and custom precision(ms):
 ```
