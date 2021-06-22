@@ -29,7 +29,7 @@ namespace DoubleD
             if (req.url_params.get("auth") == nullptr)
             {
                 x["status"] = "no key";
-                return crow::response(401, x);
+                return crow::response(400, x);
             }
             else if(!DDserver::m_keyVerified(req.url_params.get("auth")))
             {
@@ -68,7 +68,7 @@ namespace DoubleD
                     if (req.url_params.get("lockname") == nullptr || req.url_params.get("auth") == nullptr)
                     {
                         x["status"] = "invalid params";
-                        return crow::response(401, x);
+                        return crow::response(400, x);
                     }
 
                     else
@@ -109,7 +109,7 @@ namespace DoubleD
                     if (DDserver::m_reqTimedout(timeout, lockName, PRECISION))
                     {
                         x["status"] = "timed out";
-                        return crow::response(401, x);
+                        return crow::response(408, x);
                     }
 
                     else
@@ -131,7 +131,7 @@ namespace DoubleD
             if (req.url_params.get("lockname") == nullptr || req.url_params.get("key") == nullptr)
             {
                 x["status"] = "invalid params";
-                return crow::response(401, x);
+                return crow::response(400, x);
             }
 
             else
@@ -154,7 +154,7 @@ namespace DoubleD
             }
             DDserver::m_storageMutex.unlock();
             x["status"] = "no match";
-            return crow::response(401, x);
+            return crow::response(400, x);
                 });
 
         std::thread th1(&DDserver::m_checkLifetimes, PRECISION);
