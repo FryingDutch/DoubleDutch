@@ -16,6 +16,51 @@ bool isDigit(std::string str)
 	return true;
 }
 
+void handlePrefix(char prefix, int& _precision, int& _threads, bool& _is_https, int value)
+{
+	switch (prefix)
+	{
+	case 'p':
+		_precision = value;
+		break;
+
+	case 't':
+		_threads = value;
+		break;
+
+	case 'h':
+	{
+		int https = value;
+		if (https == 0)
+		{
+			_is_https = false;
+		}
+		else
+		{
+			_precision = 0;
+		}
+	}
+	break;
+
+	default:
+		_precision = 0;
+		break;
+	}
+}
+
+void run(int _port, int _precision, int _threads, bool _is_https)
+{
+	if (_port > 0 && _precision > 0 && _threads > 0)
+	{
+		DoubleD::DDserver::m_startup(_port, _threads, _precision, _is_https);
+	}
+
+	else
+	{
+		std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	int port;
@@ -23,8 +68,6 @@ int main(int argc, char* argv[])
 	int threads = std::thread::hardware_concurrency();
 	bool is_https = true;
 
-	//Need to reduce the amount of code this switch statement now takes
-	//Its easier to maintain, but harder to read. 
 	switch (argc)
 	{
 	case 2:
@@ -32,15 +75,7 @@ int main(int argc, char* argv[])
 		{
 			port = std::stoi(argv[1]);
 
-			if (port > 0 && threads > 0 && precision > 0)
-			{
-				DoubleD::DDserver::m_startup(port, threads, precision, is_https);
-			}
-
-			else
-			{
-				std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
-			}
+			run(port, precision, threads, is_https);
 		}
 
 		else
@@ -52,46 +87,9 @@ int main(int argc, char* argv[])
 	case 4:
 		if (isDigit(argv[1]) && isDigit(argv[3]))
 		{
-			switch (*argv[2])
-			{
-			case 'p':
-				precision = std::stoi(argv[3]);
-				break;
-
-			case 't':
-				threads = std::stoi(argv[3]);
-				break;
-
-			case 'h':
-			{
-				int https = std::stoi(argv[3]);
-				if (https == 0)
-				{
-					is_https = false;
-				}
-				else
-				{
-					precision = 0;
-				}
-			}
-			break;
-
-			default:
-				precision = 0;
-				break;
-			}
-
+			handlePrefix(*argv[2], precision, threads, is_https, std::stoi(argv[3]));
 			port = std::stoi(argv[1]);
-
-			if (port > 0 && threads > 0 && precision > 0)
-			{
-				DoubleD::DDserver::m_startup(port, threads, precision, is_https);
-			}
-
-			else
-			{
-				std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
-			}
+			run(port, precision, threads, is_https);
 		}
 
 		else
@@ -103,74 +101,11 @@ int main(int argc, char* argv[])
 	case 6:
 		if (isDigit(argv[1]) && isDigit(argv[3]) && isDigit(argv[5]))
 		{
-			switch (*argv[2])
-			{
-			case 'p':
-				precision = std::stoi(argv[3]);
-				break;
-
-			case 't':
-				threads = std::stoi(argv[3]);
-				break;
-
-			case 'h':
-			{
-				int https = std::stoi(argv[3]);
-				if (https == 0)
-				{
-					is_https = false;
-				}
-				else
-				{
-					precision = 0;
-				}
-			}
-				break;
-
-			default:
-				precision = 0;
-				break;
-			}
-
-			switch (*argv[4])
-			{
-			case 'p':
-				precision = std::stoi(argv[5]);
-				break;
-
-			case 't':
-				threads = std::stoi(argv[5]);
-				break;
-
-			case 'h':
-			{
-				int https = std::stoi(argv[5]);
-				if (https == 0)
-				{
-					is_https = false;
-				}
-				else
-				{
-					precision = 0;
-				}
-			}
-			break;
-
-			default:
-				precision = 0;
-				break;
-			}
+			handlePrefix(*argv[2], precision, threads, is_https, std::stoi(argv[3]));
+			handlePrefix(*argv[4], precision, threads, is_https, std::stoi(argv[5]));
 			port = std::stoi(argv[1]);
 
-			if (port > 0 && threads > 0 && precision > 0)
-			{
-				DoubleD::DDserver::m_startup(port, threads, precision, is_https);
-			}
-
-			else
-			{
-				std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
-			}
+			run(port, precision, threads, is_https);
 		}
 		else
 		{
@@ -182,104 +117,13 @@ int main(int argc, char* argv[])
 	case 8:
 		if (isDigit(argv[1]) && isDigit(argv[3]) && isDigit(argv[5]) && isDigit(argv[7]))
 		{
-			switch (*argv[2])
-			{
-			case 'p':
-				precision = std::stoi(argv[3]);
-				break;
-
-			case 't':
-				threads = std::stoi(argv[3]);
-				break;
-
-			case 'h':
-			{
-				int https = std::stoi(argv[3]);
-				if (https == 0)
-				{
-					is_https = false;
-				}
-				else
-				{
-					precision = 0;
-				}
-			}
-				break;
-
-			default:
-				precision = 0;
-				break;
-			}
-
-			switch (*argv[4])
-			{
-			case 'p':
-				precision = std::stoi(argv[5]);
-				break;
-
-			case 't':
-				threads = std::stoi(argv[5]);
-				break;
-
-			case 'h':
-			{
-				int https = std::stoi(argv[5]);
-				if (https == 0)
-				{
-					is_https = false;
-				}
-				else
-				{
-					precision = 0;
-				}
-			}
-				break;
-
-			default:
-				precision = 0;
-				break;
-			}
-
-			switch (*argv[6])
-			{
-			case 'p':
-				precision = std::stoi(argv[7]);
-				break;
-
-			case 't':
-				threads = std::stoi(argv[7]);
-				break;
-
-			case 'h':
-			{
-				int https = std::stoi(argv[7]);
-				if (https == 0)
-				{
-					is_https = false;
-				}
-				else
-				{
-					precision = 0;
-				}
-			}
-		    break;
-
-			default:
-				precision = 0;
-				break;
-			}
+			handlePrefix(*argv[2], precision, threads, is_https, std::stoi(argv[3]));
+			handlePrefix(*argv[4], precision, threads, is_https, std::stoi(argv[5]));
+			handlePrefix(*argv[6], precision, threads, is_https, std::stoi(argv[7]));
 
 			port = std::stoi(argv[1]);
 
-			if (port > 0 && threads > 0 && precision > 0)
-			{
-				DoubleD::DDserver::m_startup(port, threads, precision, is_https);
-			}
-
-			else
-			{
-				std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
-			}
+			run(port, precision, threads, is_https);
 		}
 		else
 		{
