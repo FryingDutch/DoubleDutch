@@ -4,6 +4,11 @@
 #include <thread>
 #include "DDserver.h"
 
+void errormsg(const char* message)
+{
+	std::cout << "[ERROR]: " << message << "! Terminating...\n";
+}
+
 bool isDigit(std::string str)
 {
 	for (long unsigned int i = 0; i < str.length(); i++)
@@ -16,7 +21,7 @@ bool isDigit(std::string str)
 	return true;
 }
 
-void handlePrefix(char prefix, int& _precision, int& _threads, bool& _is_https, int value)
+void handlePrefix(char prefix, int& _precision, int& _threads, bool& _is_https, bool& _error, int value)
 {
 	switch (prefix)
 	{
@@ -28,10 +33,8 @@ void handlePrefix(char prefix, int& _precision, int& _threads, bool& _is_https, 
 		_threads = value;
 		break;
 
-	case 'h':
-	{
-		int https = value;
-		if (https == 0)
+	case 'h':	
+		if (value == 0)
 		{
 			_is_https = false;
 		}
@@ -39,25 +42,32 @@ void handlePrefix(char prefix, int& _precision, int& _threads, bool& _is_https, 
 		{
 			_precision = 0;
 		}
-	}
-	break;
+		break;
 
 	default:
-		_precision = 0;
+		_error = true;
 		break;
 	}
 }
 
-void run(int _port, int _precision, int _threads, bool _is_https)
+void run(int _port, int _precision, int _threads, bool _is_https, bool _error)
 {
 	if (_port > 0 && _precision > 0 && _threads > 0)
 	{
-		DoubleD::DDserver::m_startup(_port, _threads, _precision, _is_https);
+		if (_error == false)
+		{
+			DoubleD::DDserver::m_startup(_port, _threads, _precision, _is_https);
+		}
+
+		else
+		{
+			errormsg("Not a valid prefix");
+		}
 	}
 
 	else
 	{
-		std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
+		errormsg("Need [SIGNED INT] as argument");
 	}
 }
 
@@ -67,6 +77,7 @@ int main(int argc, char* argv[])
 	int precision = 333; 
 	int threads = std::thread::hardware_concurrency();
 	bool is_https = true;
+	bool error = false;
 
 	switch (argc)
 	{
@@ -75,41 +86,41 @@ int main(int argc, char* argv[])
 		{
 			port = std::stoi(argv[1]);
 
-			run(port, precision, threads, is_https);
+			run(port, precision, threads, is_https, error);
 		}
 
 		else
 		{
-			std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
+			errormsg("Not a digit");
 		}
 		break;
 
 	case 4:
 		if (isDigit(argv[1]) && isDigit(argv[3]))
 		{
-			handlePrefix(*argv[2], precision, threads, is_https, std::stoi(argv[3]));
+			handlePrefix(*argv[2], precision, threads, is_https, error, std::stoi(argv[3]));
 			port = std::stoi(argv[1]);
-			run(port, precision, threads, is_https);
+			run(port, precision, threads, is_https, error);
 		}
 
 		else
 		{
-			std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
+			errormsg("Not a digit");
 		}
 		break;
 
 	case 6:
 		if (isDigit(argv[1]) && isDigit(argv[3]) && isDigit(argv[5]))
 		{
-			handlePrefix(*argv[2], precision, threads, is_https, std::stoi(argv[3]));
-			handlePrefix(*argv[4], precision, threads, is_https, std::stoi(argv[5]));
+			handlePrefix(*argv[2], precision, threads, is_https, error, std::stoi(argv[3]));
+			handlePrefix(*argv[4], precision, threads, is_https, error, std::stoi(argv[5]));
 			port = std::stoi(argv[1]);
 
-			run(port, precision, threads, is_https);
+			run(port, precision, threads, is_https, error);
 		}
 		else
 		{
-			std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
+			errormsg("Not a digit");
 		}
 
 		break;
@@ -117,23 +128,23 @@ int main(int argc, char* argv[])
 	case 8:
 		if (isDigit(argv[1]) && isDigit(argv[3]) && isDigit(argv[5]) && isDigit(argv[7]))
 		{
-			handlePrefix(*argv[2], precision, threads, is_https, std::stoi(argv[3]));
-			handlePrefix(*argv[4], precision, threads, is_https, std::stoi(argv[5]));
-			handlePrefix(*argv[6], precision, threads, is_https, std::stoi(argv[7]));
+			handlePrefix(*argv[2], precision, threads, is_https, error, std::stoi(argv[3]));
+			handlePrefix(*argv[4], precision, threads, is_https, error, std::stoi(argv[5]));
+			handlePrefix(*argv[6], precision, threads, is_https, error, std::stoi(argv[7]));
 
 			port = std::stoi(argv[1]);
 
-			run(port, precision, threads, is_https);
-		}
-		else
-		{
-			std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
+			run(port, precision, threads, is_https, error);
 		}
 
+		else
+		{
+			errormsg("Not a digit");
+		}
 		break;
 
 	default:
-		std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
+		errormsg("Not a valid argument count");
 		break;
 
 	}
