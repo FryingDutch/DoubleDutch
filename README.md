@@ -37,20 +37,20 @@ docker run -p 8000:8000 server 8000
 ```
 To run and listen for connections on port 8000 with 12 threads and default precision(333ms):
 ```
-docker run -p 8000:8000 server 8000 12
+docker run -p 8000:8000 server 8000 t 12
 ```
 DoubleDutch allows you to change the precision of the application. This effects the time between each cycle in which the program looks for a free lock during a reuqest, or if a lock lifetime has been expired(dedicated thread). At default, the application does 3 cycles each second(333ms) for both of these functions.
 
 To run and listen for connections on port 8000 with default thread amount (8) and custom precision(ms):
 ```
-docker run -p 8000:8000 server 8000 p 100
+docker run -p 8000:8000 server 8000 p 500
 ```
 
 To run and listen for connections on port 8000 with custom thread amount and custom precision(ms):
 ```
-docker run -p 8000:8000 server 8000 p 100 15
+docker run -p 8000:8000 server 8000 p 100 t 15
 #OR
-docker run -p 8000:8000 server 8000 15 p 100
+docker run -p 8000:8000 server 8000 t 12 p 250
 ```
 
 ## Cluster mode
