@@ -22,7 +22,7 @@ r = requests.get("https://<host>:<port>/releaseLock?lockname=lock_as_string&key=
 ```
   
 ## Installation and set-up
-DoubleDutch needs a .crt file named "certificate.crt" and a .key file named "privateKey.key", in order to run. 
+DoubleDutch needs a .crt file named "certificate.crt" and a .key file named "privateKey.key", in order to run on https.
 You will have to place these files in the SSL directory.
 
 The program also uses authentication trough API Key verification. To set the API key, you just edit the config.txt file.
@@ -31,27 +31,42 @@ DoubleDutch runs inside a Docker container. To build using the provided _.Docker
 ```bash
 docker build . -t server
 ```
-To run and listen for connections on port 8000 with default thread amount (8) and default precision(333ms):
+DoubleDutch needs at least the portnumber from the user.
+To run and listen for connections on port 8000:
 ```
 docker run -p 8000:8000 server 8000
 ```
-To run and listen for connections on port 443 with 12 threads and default precision(333ms):
-```
-docker run -p 443:443 server 443 t 12
-```
-DoubleDutch allows you to change the precision of the application. This effects the time between each cycle in which the program looks for a free lock during a reuqest, or if a lock lifetime has been expired(dedicated thread). At default, the application does 3 cycles each second(333ms) for both of these functions.
+Besides the default settings, DoubleDutch offers optional customisation.
 
-To run and listen for connections on port 80 with default thread amount (8) and custom precision(ms):
 ```
-docker run -p 80:80 server 80 p 500
+#Precision: this effects the amount of time the program sleeps(ms) in between cycles. Specifically where a request is waiting for a lock to be possibly freed. And also in a #dedicated thread that checks all the lifetimes of the current locks. By default this is 333ms.
+
+p 100
+
+#Threads: The amount of threads the program will use. By default this is 8
+
+t 12
+
+#HTTPS: If the user wants to disable HTTPS. Only option here is 0 (which makes the program run on http). HTTPS is on by default.
+
+h 0
 ```
 
-To run and listen for connections on port 443 with custom thread amount and custom precision(ms):
+for example:
 ```
-docker run -p 443:443 server 443 p 100 t 15
+docker run -p 8000:8000 server 8000 t 12 p 100 h 0
 #OR
-docker run -p 443:443 server 443 t 12 p 250
+docker run -p 8000:8000 server 8000 t 4
+#OR
+docker run -p 8000:8000 server 8000 p 250 h 0
+#OR
+docker run -p 8000:8000 server 8000 h 0 t 11
+#OR
+docker run -p 8000:8000 server 8000 t 12 p 500 h 0
+
+#etc
 ```
+
 
 ## Cluster mode
 Distributed locks are used for roughly [two reasons](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html):
