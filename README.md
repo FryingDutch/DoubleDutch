@@ -38,17 +38,21 @@ docker run -p 8000:8000 server 8000
 ```
 Besides the default settings, DoubleDutch offers optional customisation.
 
-```
-#Precision: this effects the amount of time the program sleeps(ms) in between cycles. Specifically where a request is waiting for a lock to be possibly freed. And also in a #dedicated thread that checks all the lifetimes of the current locks. By default this is 333ms.
+#Precision: this effects the amount of time the program sleeps(ms) in between cycles. Specifically where a request is waiting for a lock to be possibly freed. And also in a  the dedicated thread that checks the lifetimes of the current locks. By default this is 333ms.
 
+```
 p 100
+```
 
 #Threads: The amount of threads the program will use. By default this is 8
 
+```
 t 12
+```
 
 #HTTPS: If the user wants to disable HTTPS. Only option here is 0 (which makes the program run on http). HTTPS is on by default.
 
+```
 h 0
 ```
 
@@ -62,7 +66,7 @@ docker run -p 8000:8000 server 8000 p 250 h 0
 #OR
 docker run -p 8000:8000 server 8000 h 0 t 11
 #OR
-docker run -p 8000:8000 server 8000 t 12 p 500 h 0
+docker run -p 8000:8000 server 8000 h 0
 
 #etc
 ```
