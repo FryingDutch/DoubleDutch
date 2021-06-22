@@ -1,4 +1,5 @@
 #include <string>
+#include <csignal>
 #include <iostream>
 #include <thread>
 #include "DDserver.h"
@@ -15,7 +16,6 @@ bool isDigit(std::string str)
 	return true;
 }
 
-//Need to reduce the amount of code
 int main(int argc, char* argv[])
 {
 	int port;
@@ -32,62 +32,109 @@ int main(int argc, char* argv[])
 			{
 				DoubleD::DDserver::m_startup(port, threads, precision);
 			}
-		}
-		break;
 
-	case 3:
-		if (isDigit(argv[1]) && isDigit(argv[2]))
-		{
-			port = std::stoi(argv[1]);
-			threads = std::stoi(argv[2]);
-
-			if (port > 0 && threads > 0 && precision > 0)
+			else
 			{
-				DoubleD::DDserver::m_startup(port, threads, precision);
+				std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
 			}
-		}		
+		}
+
+		else
+		{
+			std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
+		}
 		break;
 
 	case 4:
-		if (isDigit(argv[1]) && *argv[2] == 'p' && isDigit(argv[3]))
+		if (isDigit(argv[1]) && isDigit(argv[3]))
 		{
+			switch (*argv[2])
+			{
+			case 'p':
+				precision = std::stoi(argv[3]);
+				break;
+
+			case 't':
+				threads = std::stoi(argv[3]);
+				break;
+
+			default:
+				precision = 0;
+				break;
+			}
+
 			port = std::stoi(argv[1]);
-			precision = std::stoi(argv[3]);
 
 			if (port > 0 && threads > 0 && precision > 0)
 			{
 				DoubleD::DDserver::m_startup(port, threads, precision);
 			}
+
+			else
+			{
+				std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
+			}
+		}
+
+		else
+		{
+			std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
 		}
 		break;
 
-	case 5:
-		if (isDigit(argv[1]) && *argv[2] == 'p' && isDigit(argv[3]) && isDigit(argv[4]))
+	case 6:
+		if (isDigit(argv[1]) && isDigit(argv[3]) && isDigit(argv[5]))
 		{
+			switch (*argv[2])
+			{
+			case 'p':
+				precision = std::stoi(argv[3]);
+				break;
+
+			case 't':
+				threads = std::stoi(argv[3]);
+				break;
+
+			default:
+				precision = 0;
+				break;
+			}
+
+			switch (*argv[4])
+			{
+			case 'p':
+				precision = std::stoi(argv[5]);
+				break;
+
+			case 't':
+				threads = std::stoi(argv[5]);
+				break;
+
+			default:
+				precision = 0;
+				break;
+			}
 			port = std::stoi(argv[1]);
-			precision = std::stoi(argv[3]);
-			threads = std::stoi(argv[4]);
 
 			if (port > 0 && threads > 0 && precision > 0)
 			{
 				DoubleD::DDserver::m_startup(port, threads, precision);
 			}
-		}
 
-		else if (isDigit(argv[1]) && isDigit(argv[2]) && *argv[3] == 'p' && isDigit(argv[4]))
-		{
-			port = std::stoi(argv[1]);
-			precision = std::stoi(argv[4]);
-			threads = std::stoi(argv[2]);
-
-			if (port > 0 && threads > 0 && precision > 0)
+			else
 			{
-				DoubleD::DDserver::m_startup(port, threads, precision);
+				std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
 			}
 		}
+		else
+		{
+			std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
+		}
+
 		break;
 
 	default:
+		std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
 		break;
 
 	}
