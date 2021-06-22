@@ -24,13 +24,7 @@ namespace DoubleD
 
 	bool Lock::m_expired()
 	{
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> difference = currentTime - m_start;
-		if (difference.count() > this->m_lifeTime)
-		{ return true; }
-
-		else
-		{ return false;	}
+		return this->m_timeLeft() < 0;
 	}
 
 	double Lock::m_timeLeft() 
