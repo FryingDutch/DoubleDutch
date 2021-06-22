@@ -38,7 +38,7 @@ docker run -p 8000:8000 server 8000
 ```
 Besides the default settings, DoubleDutch offers optional customisation.
 
-#Precision: this effects the amount of time the program sleeps(ms) in between cycles. Specifically where a request is waiting for a lock to be possibly freed. And also in a  the dedicated thread that checks the lifetimes of the current locks. By default this is 333ms.
+#Precision: this effects the amount of time a thread sleeps(ms) in between cycles. Specifically where a request is waiting for a lock to be possibly freed. And also in a  the dedicated thread that checks the lifetimes of the current locks. By default this is 333ms.
 
 ```
 p 100
