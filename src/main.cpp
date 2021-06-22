@@ -21,7 +21,7 @@ bool isDigit(std::string str)
 	return true;
 }
 
-void handlePrefix(char prefix, int& _precision, int& _threads, bool& _is_https, int& _error, int value)
+void handlePrefix(char prefix, int& _precision, int& _threads, bool& _is_https, bool& _error, int value)
 {
 	switch (prefix)
 	{
@@ -40,33 +40,25 @@ void handlePrefix(char prefix, int& _precision, int& _threads, bool& _is_https, 
 		}
 		else
 		{
-			_error = 2;
+			errormsg("h only takes 0 as an argument");
+			_error = true;
 		}
 		break;
 
 	default:
-		_error = 1;
+		errormsg("Not a valid prefix");
+		_error = true;
 		break;
 	}
 }
 
-void run(int _port, int _precision, int _threads, bool _is_https, int _error)
+void run(int _port, int _precision, int _threads, bool _is_https, bool _error)
 {
 	if (_port > 0 && _precision > 0 && _threads > 0)
 	{
-		if (_error == 0)
+		if (_error == false)
 		{
 			DoubleD::DDserver::m_startup(_port, _threads, _precision, _is_https);
-		}
-
-		else if (_error == 1)
-		{
-			errormsg("Not a valid prefix");
-		}
-
-		else
-		{
-			errormsg("h only takes 0 as an argument");
 		}
 	}
 
@@ -82,7 +74,7 @@ int main(int argc, char* argv[])
 	int precision = 333; 
 	int threads = std::thread::hardware_concurrency();
 	bool is_https = true;
-	int error = 0;
+	bool error = false;
 
 	switch (argc)
 	{
