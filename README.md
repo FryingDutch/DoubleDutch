@@ -36,21 +36,21 @@ To run and listen for connections on port 8000:
 ```
 docker run -p 8000:8000 server 8000
 ```
-Besides the default settings, DoubleDutch offers optional customisation.
+**Besides the default settings, DoubleDutch offers optional customisation.**
 
-#Precision: this effects the amount of time a thread sleeps(ms) in between cycles. Specifically where a request is waiting for a lock to be possibly freed. And also in a  the dedicated thread that checks the lifetimes of the current locks. By default this is 333ms.
-
-```
-p 100
-```
-
-#Threads: The amount of threads the program will use. By default this is 8
+- **Precision:** this effects the amount of time a thread sleeps(ms) in between cycles. Specifically where a request is waiting for a lock to be possibly freed. And also in a  the dedicated thread that checks the lifetimes of the current locks. By default this is 333ms.
 
 ```
-t 12
+p 333
 ```
 
-#HTTPS: If the user wants to disable HTTPS. Only option here is 0 (which makes the program run on http). HTTPS is on by default.
+- **Threads:** The amount of threads the program will use. By default this is 8
+
+```
+t 8
+```
+
+- **HTTPS:** If the user wants to disable HTTPS. Only option here is 0 (which makes the program run on http). HTTPS is on by default.
 
 ```
 h 0
@@ -80,4 +80,4 @@ Distributed locks are used for roughly [two reasons](https://martin.kleppmann.co
 When you're using DoubleDutch for the latter reason, you cannot use DoubleDutch in cluster mode. When employing DoubleDutch for efficiency reasons, though, you can easily spin up multiple instances (on different servers). In that case, you have to ensure that the clients are aware of all the hostnames. When one server is down, clients can try to acquire a lock at the 'next' DoubleDutch instances. 
 
 ## Known issues and limitations
-- No way to signal (Ctrl + c) the server to stop. Can stop running by closing the terminal. (The exit protocols will still run that way).
+- No way to graciously exit the server. Terminal has to be closed.
