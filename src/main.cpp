@@ -21,6 +21,10 @@ int main(int argc, char* argv[])
 	int port;
 	int precision = 333; 
 	int threads = std::thread::hardware_concurrency();
+	bool is_https = true;
+
+	//Need to reduce the amount of code this switch statement now takes
+	//Its easier to maintain, but harder to read. 
 	switch (argc)
 	{
 	case 2:
@@ -30,7 +34,7 @@ int main(int argc, char* argv[])
 
 			if (port > 0 && threads > 0 && precision > 0)
 			{
-				DoubleD::DDserver::m_startup(port, threads, precision);
+				DoubleD::DDserver::m_startup(port, threads, precision, is_https);
 			}
 
 			else
@@ -58,6 +62,20 @@ int main(int argc, char* argv[])
 				threads = std::stoi(argv[3]);
 				break;
 
+			case 'h':
+			{
+				int https = std::stoi(argv[3]);
+				if (https == 0)
+				{
+					is_https = false;
+				}
+				else
+				{
+					precision = 0;
+				}
+			}
+			break;
+
 			default:
 				precision = 0;
 				break;
@@ -67,7 +85,7 @@ int main(int argc, char* argv[])
 
 			if (port > 0 && threads > 0 && precision > 0)
 			{
-				DoubleD::DDserver::m_startup(port, threads, precision);
+				DoubleD::DDserver::m_startup(port, threads, precision, is_https);
 			}
 
 			else
@@ -95,6 +113,20 @@ int main(int argc, char* argv[])
 				threads = std::stoi(argv[3]);
 				break;
 
+			case 'h':
+			{
+				int https = std::stoi(argv[3]);
+				if (https == 0)
+				{
+					is_https = false;
+				}
+				else
+				{
+					precision = 0;
+				}
+			}
+				break;
+
 			default:
 				precision = 0;
 				break;
@@ -110,6 +142,20 @@ int main(int argc, char* argv[])
 				threads = std::stoi(argv[5]);
 				break;
 
+			case 'h':
+			{
+				int https = std::stoi(argv[5]);
+				if (https == 0)
+				{
+					is_https = false;
+				}
+				else
+				{
+					precision = 0;
+				}
+			}
+			break;
+
 			default:
 				precision = 0;
 				break;
@@ -118,7 +164,116 @@ int main(int argc, char* argv[])
 
 			if (port > 0 && threads > 0 && precision > 0)
 			{
-				DoubleD::DDserver::m_startup(port, threads, precision);
+				DoubleD::DDserver::m_startup(port, threads, precision, is_https);
+			}
+
+			else
+			{
+				std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
+			}
+		}
+		else
+		{
+			std::cout << "[ERROR]: Invalid arguments! Terminating...\n";
+		}
+
+		break;
+
+	case 8:
+		if (isDigit(argv[1]) && isDigit(argv[3]) && isDigit(argv[5]) && isDigit(argv[7]))
+		{
+			switch (*argv[2])
+			{
+			case 'p':
+				precision = std::stoi(argv[3]);
+				break;
+
+			case 't':
+				threads = std::stoi(argv[3]);
+				break;
+
+			case 'h':
+			{
+				int https = std::stoi(argv[3]);
+				if (https == 0)
+				{
+					is_https = false;
+				}
+				else
+				{
+					precision = 0;
+				}
+			}
+				break;
+
+			default:
+				precision = 0;
+				break;
+			}
+
+			switch (*argv[4])
+			{
+			case 'p':
+				precision = std::stoi(argv[5]);
+				break;
+
+			case 't':
+				threads = std::stoi(argv[5]);
+				break;
+
+			case 'h':
+			{
+				int https = std::stoi(argv[5]);
+				if (https == 0)
+				{
+					is_https = false;
+				}
+				else
+				{
+					precision = 0;
+				}
+			}
+				break;
+
+			default:
+				precision = 0;
+				break;
+			}
+
+			switch (*argv[6])
+			{
+			case 'p':
+				precision = std::stoi(argv[7]);
+				break;
+
+			case 't':
+				threads = std::stoi(argv[7]);
+				break;
+
+			case 'h':
+			{
+				int https = std::stoi(argv[7]);
+				if (https == 0)
+				{
+					is_https = false;
+				}
+				else
+				{
+					precision = 0;
+				}
+			}
+		    break;
+
+			default:
+				precision = 0;
+				break;
+			}
+
+			port = std::stoi(argv[1]);
+
+			if (port > 0 && threads > 0 && precision > 0)
+			{
+				DoubleD::DDserver::m_startup(port, threads, precision, is_https);
 			}
 
 			else
