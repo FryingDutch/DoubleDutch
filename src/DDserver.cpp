@@ -23,25 +23,36 @@ namespace DoubleD
         CROW_ROUTE(app, "/")([]() { return "Welcome to DoubleDutch"; });
 
         CROW_ROUTE(app, "/status")
-            ([&] {
+            ([&] (const crow::request& req){
             crow::json::wvalue x;
 
+            if (req.url_params.get("auth") == nullptr)
+            {
+                x["status"] = "no key";
+                return crow::response(401, x);
+            }
+            else if(!DDserver::m_keyVerified(req.url_params.get("auth")))
+            {
+                x["status"] = "invalid key";
+                return crow::response(401, x);
+            }
+
             DDserver::m_storageMutex.lock();
-            if (DDserver::m_lockVector.size() != 0)
+            if (DDserver::m_lockVector.size() > 0)
             {
                 for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
-                    x["Locks"][i]["Name"] = DDserver::m_lockVector[i].m_getName();
-                    x["Locks"][i]["Token"] = DDserver::m_lockVector[i].m_getSessionToken();
-                    x["Locks"][i]["Time Left"] = DDserver::m_lockVector[i].m_timeLeft();
+                    x["status"][i]["name"] = DDserver::m_lockVector[i].m_getName();
+                    x["status"][i]["token"] = DDserver::m_lockVector[i].m_getSessionToken();
+                    x["status"][i]["remaining"] = DDserver::m_lockVector[i].m_timeLeft();
                 }
                 DDserver::m_storageMutex.unlock();
                 return crow::response(200, x);
             }
             else 
             { 
-                x["status"] = false; 
+                x["status"] = "empty"; 
                 DDserver::m_storageMutex.unlock(); 
-                return crow::response(401, x); 
+                return crow::response(200, x); 
             }
             });
 
@@ -56,6 +67,7 @@ namespace DoubleD
 
                     if (req.url_params.get("lockname") == nullptr || req.url_params.get("auth") == nullptr)
                     {
+                        x["status"] = "invalid params";
                         return crow::response(401, x);
                     }
 
@@ -68,6 +80,7 @@ namespace DoubleD
 
                         else
                         {
+                            x["status"] = "invalid key";
                             return crow::response(401, x);
                         }
                     }
@@ -95,6 +108,7 @@ namespace DoubleD
 
                     if (DDserver::m_reqTimedout(timeout, lockName, PRECISION))
                     {
+                        x["status"] = "timed out";
                         return crow::response(401, x);
                     }
 
@@ -116,6 +130,7 @@ namespace DoubleD
             x["status"] = false;
             if (req.url_params.get("lockname") == nullptr || req.url_params.get("key") == nullptr)
             {
+                x["status"] = "invalid params";
                 return crow::response(401, x);
             }
 
@@ -138,13 +153,14 @@ namespace DoubleD
                 }
             }
             DDserver::m_storageMutex.unlock();
+            x["status"] = "no match";
             return crow::response(401, x);
                 });
 
         std::thread th1(&DDserver::m_checkLifetimes, PRECISION);
         app.port(PORTNUM).ssl_file("../SSL/certificate.crt", "../SSL/privateKey.key").concurrency(NUMOFTHREADS).run();
         DDserver::m_isRunning = false;
-        th1.join();        
+        th1.join();
     }
 
     void DDserver::m_checkLifetimes(const unsigned int PRECISION)
