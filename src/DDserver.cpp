@@ -17,7 +17,7 @@ namespace DoubleD
     DDserver::DDserver()
     {}
 
-    void DDserver::m_startup(const unsigned int PORTNUM, const unsigned int NUMOFTHREADS, const unsigned int PRECISION) {
+    void DDserver::m_startup(const unsigned int PORTNUM, const unsigned int NUMOFTHREADS, const unsigned int PRECISION, const bool HTTPS) {
 
         crow::SimpleApp app;
         CROW_ROUTE(app, "/")([]() { return "Welcome to DoubleDutch"; });
@@ -158,7 +158,16 @@ namespace DoubleD
                 });
 
         std::thread th1(&DDserver::m_checkLifetimes, PRECISION);
-        app.port(PORTNUM).ssl_file("../SSL/certificate.crt", "../SSL/privateKey.key").concurrency(NUMOFTHREADS).run();
+        if (HTTPS == true)
+        {
+            app.port(PORTNUM).ssl_file("../SSL/certificate.crt", "../SSL/privateKey.key").concurrency(NUMOFTHREADS).run();
+        }
+
+        else
+        {
+            app.port(PORTNUM).concurrency(NUMOFTHREADS).run();
+        }
+
         DDserver::m_isRunning = false;
         th1.join();
     }
