@@ -33,6 +33,13 @@ namespace DoubleD
 		{ return false;	}
 	}
 
+	double Lock::m_timeLeft() 
+	{
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> difference = currentTime - m_start;
+
+		return this->m_lifeTime - difference.count();
+	}
 	std::string Lock::m_getName() { return this->m_name; }
 	std::string Lock::m_getSessionToken() { return this->m_session_token; }
 }
