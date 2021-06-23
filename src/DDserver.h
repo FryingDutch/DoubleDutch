@@ -16,10 +16,10 @@ namespace DoubleD
 		static std::vector<Lock> m_lockVector;
 
 	private:
-		//functions used to define the custom settings of the server
+		//functions used to define the settings of the server
 		static void m_errormsg(const char* message);
 		static bool m_isDigit(std::string str);
-		static void m_handlePrefix(char prefix, int& _precision, int& _threads, bool& _is_https, bool& _error, int value);
+		static void m_handlePrefixes(char* _argv[], int& _port, int& _precision, int& _threads, bool& _is_https, bool& _error, int value);
 
 		//functions that are being used to define runtime situations
 		static void m_startup(const unsigned int PORTNUM, const unsigned int NUMOFTHREADS, const unsigned int PRECISION, const bool HTTPS);
@@ -29,7 +29,7 @@ namespace DoubleD
 
 	public:
 		DDserver();
-		static void m_boot(int _argc, char* _argv[]);
+		static void m_setAndBoot(int _argc, char* _argv[]);
 	};
 }
 
