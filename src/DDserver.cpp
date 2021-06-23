@@ -17,8 +17,151 @@ namespace DoubleD
     DDserver::DDserver()
     {}
 
-    void DDserver::m_startup(const unsigned int PORTNUM, const unsigned int NUMOFTHREADS, const unsigned int PRECISION, const bool HTTPS) {
+    //setting functions
+    void DDserver::m_errormsg(const char* message)
+    {
+        std::cout << "[ERROR]: " << message << "! Terminating...\n";
+    }
 
+    bool DDserver::m_isDigit(std::string str)
+    {
+        for (long unsigned int i = 0; i < str.length(); i++)
+        {
+            if (!std::isdigit(str[i]))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void DDserver::m_handlePrefix(char prefix, int& _precision, int& _threads, bool& _is_https, bool& _error, int value)
+    {
+        switch (prefix)
+        {
+        case 'p':
+            _precision = value;
+            break;
+
+        case 't':
+            _threads = value;
+            break;
+
+        case 'h':
+            if (value == 0)
+            {
+                _is_https = false;
+            }
+            else
+            {
+                DDserver::m_errormsg("h only takes 0 as an argument");
+                _error = true;
+            }
+            break;
+
+        default:
+            DDserver::m_errormsg("Not a valid prefix");
+            _error = true;
+            break;
+        }
+    }
+
+    void DDserver::m_boot(int _argc, char* _argv[])
+    {
+        int _port = 1;
+        int _precision = 333;
+        int _threads = std::thread::hardware_concurrency();
+        bool _is_https = true;
+        bool _error = false;
+
+        switch (_argc)
+        {
+        case 2:
+            if (DDserver::m_isDigit(_argv[1]))
+            {
+                _port = std::stoi(_argv[1]);
+                break;
+            }
+
+            else
+            {
+                DDserver::m_errormsg("Not a digit");
+                _error = true;
+                break;
+            }
+            break;
+
+        case 4:
+            if (DDserver::m_isDigit(_argv[1]) && DDserver::m_isDigit(_argv[3]))
+            {
+                DDserver::m_handlePrefix(*_argv[2], _precision, _threads, _is_https, _error, std::stoi(_argv[3]));
+                _port = std::stoi(_argv[1]);
+                break;
+            }
+
+            else
+            {
+                DDserver::m_errormsg("Not a digit");
+                _error = true;
+                break;
+            }
+
+        case 6:
+            if (DDserver::m_isDigit(_argv[1]) && DDserver::m_isDigit(_argv[3]) && DDserver::m_isDigit(_argv[5]))
+            {
+                DDserver::m_handlePrefix(*_argv[2], _precision, _threads, _is_https, _error, std::stoi(_argv[3]));
+                DDserver::m_handlePrefix(*_argv[4], _precision, _threads, _is_https, _error, std::stoi(_argv[5]));
+                _port = std::stoi(_argv[1]);
+                break;
+            }
+            else
+            {
+                DDserver::m_errormsg("Not a digit");
+                _error = true;
+                break;
+            }
+
+        case 8:
+            if (DDserver::m_isDigit(_argv[1]) && DDserver::m_isDigit(_argv[3]) && DDserver::m_isDigit(_argv[5]) && DDserver::m_isDigit(_argv[7]))
+            {
+                DDserver::m_handlePrefix(*_argv[2], _precision, _threads, _is_https, _error, std::stoi(_argv[3]));
+                DDserver::m_handlePrefix(*_argv[4], _precision, _threads, _is_https, _error, std::stoi(_argv[5]));
+                DDserver::m_handlePrefix(*_argv[6], _precision, _threads, _is_https, _error, std::stoi(_argv[7]));
+
+                _port = std::stoi(_argv[1]);
+                break;
+            }
+
+            else
+            {
+                DDserver::m_errormsg("Not a digit");
+                _error = true;
+                break;
+            }
+
+        default:
+            DDserver::m_errormsg("Not a valid argument count");
+            _error = true;
+            break;
+        }
+
+        if (_port > 0 && _precision > 0 && _threads > 0)
+        {
+            if (_error == false)
+            {
+                DDserver::m_startup(_port, _threads, _precision, _is_https);
+            }
+        }
+
+        else
+        {
+            DDserver::m_errormsg("Need [SIGNED INT] as argument");
+        }
+    }
+
+    //runtime functions
+    void DDserver::m_startup(const unsigned int PORTNUM, const unsigned int NUMOFTHREADS, const unsigned int PRECISION, const bool HTTPS) 
+    {
         crow::SimpleApp app;
         CROW_ROUTE(app, "/")([]() { return "Welcome to DoubleDutch"; });
 
@@ -247,4 +390,6 @@ namespace DoubleD
             return false;
         }
     }
+
+    
 }
