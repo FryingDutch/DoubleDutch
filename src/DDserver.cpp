@@ -35,38 +35,69 @@ namespace DoubleD
         return true;
     }
 
-    void DDserver::m_handlePrefix(char prefix, int& _precision, int& _threads, bool& _is_https, bool& _error, int value)
+    void DDserver::m_handlePrefixes(char* _argv[], int& _port, int& _precision, int& _threads, bool& _is_https, bool& _error, int _argc)
     {
-        switch (prefix)
+        //if the argument count is higher then one (Need at least portnumber)
+        //and the argument count is even (every prefix needs a value)
+        //and the portnumber is an actual digit
+        if (_argc > 1 && _argc % 2 == 0 && DDserver::m_isDigit(_argv[1]))
         {
-        case 'p':
-            _precision = value;
-            break;
+            //set the port number
+            _port = std::stoi(_argv[1]);
 
-        case 't':
-            _threads = value;
-            break;
-
-        case 'h':
-            if (value == 0)
+            //for every prefix check and assign the user input to the correct variable
+            for (int i = 2; i < _argc; i+=2)
             {
-                _is_https = false;
-            }
-            else
-            {
-                DDserver::m_errormsg("h only takes 0 as an argument");
-                _error = true;
-            }
-            break;
+                //if the value next to the prefix is a digit
+                if (DDserver::m_isDigit(_argv[i+1]))
+                {
+                    switch (*_argv[i])
+                    {
+                    case 'p':
+                        _precision = std::stoi(_argv[i+1]);
+                        break;
 
-        default:
-            DDserver::m_errormsg("Not a valid prefix");
+                    case 't':
+                        _threads = std::stoi(_argv[i+1]);
+                        break;
+
+                    case 'h':
+                        if (std::stoi(_argv[i+1]) == 0)
+                        {
+                            _is_https = false;
+                        }
+                        else
+                        {
+                            DDserver::m_errormsg("h only takes 0 as an argument");
+                            _error = true;
+                        }
+                        break;
+
+                    default:
+                        DDserver::m_errormsg("Not a valid prefix");
+                        _error = true;
+                        break;
+                    }
+                }
+
+                else
+                {
+                    _error = true;
+                    std::cout << i << std::endl;
+                    DDserver::m_errormsg("Not a digit");
+                    break;
+                }
+            }
+        }
+
+        else
+        {
             _error = true;
-            break;
+            DDserver::m_errormsg("Not a valid input");
         }
     }
 
-    void DDserver::m_boot(int _argc, char* _argv[])
+    void DDserver::m_setAndBoot(int _argc, char* _argv[])
     {
         int _port = 1;
         int _precision = 333;
@@ -74,76 +105,7 @@ namespace DoubleD
         bool _is_https = true;
         bool _error = false;
 
-        switch (_argc)
-        {
-        case 2:
-            if (DDserver::m_isDigit(_argv[1]))
-            {
-                _port = std::stoi(_argv[1]);
-                break;
-            }
-
-            else
-            {
-                DDserver::m_errormsg("Not a digit");
-                _error = true;
-                break;
-            }
-            break;
-
-        case 4:
-            if (DDserver::m_isDigit(_argv[1]) && DDserver::m_isDigit(_argv[3]))
-            {
-                DDserver::m_handlePrefix(*_argv[2], _precision, _threads, _is_https, _error, std::stoi(_argv[3]));
-                _port = std::stoi(_argv[1]);
-                break;
-            }
-
-            else
-            {
-                DDserver::m_errormsg("Not a digit");
-                _error = true;
-                break;
-            }
-
-        case 6:
-            if (DDserver::m_isDigit(_argv[1]) && DDserver::m_isDigit(_argv[3]) && DDserver::m_isDigit(_argv[5]))
-            {
-                DDserver::m_handlePrefix(*_argv[2], _precision, _threads, _is_https, _error, std::stoi(_argv[3]));
-                DDserver::m_handlePrefix(*_argv[4], _precision, _threads, _is_https, _error, std::stoi(_argv[5]));
-                _port = std::stoi(_argv[1]);
-                break;
-            }
-            else
-            {
-                DDserver::m_errormsg("Not a digit");
-                _error = true;
-                break;
-            }
-
-        case 8:
-            if (DDserver::m_isDigit(_argv[1]) && DDserver::m_isDigit(_argv[3]) && DDserver::m_isDigit(_argv[5]) && DDserver::m_isDigit(_argv[7]))
-            {
-                DDserver::m_handlePrefix(*_argv[2], _precision, _threads, _is_https, _error, std::stoi(_argv[3]));
-                DDserver::m_handlePrefix(*_argv[4], _precision, _threads, _is_https, _error, std::stoi(_argv[5]));
-                DDserver::m_handlePrefix(*_argv[6], _precision, _threads, _is_https, _error, std::stoi(_argv[7]));
-
-                _port = std::stoi(_argv[1]);
-                break;
-            }
-
-            else
-            {
-                DDserver::m_errormsg("Not a digit");
-                _error = true;
-                break;
-            }
-
-        default:
-            DDserver::m_errormsg("Not a valid argument count");
-            _error = true;
-            break;
-        }
+        DDserver::m_handlePrefixes(_argv, _port, _precision, _threads, _is_https, _error, _argc);
 
         if (_port > 0 && _precision > 0 && _threads > 0)
         {
