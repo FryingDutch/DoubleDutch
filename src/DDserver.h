@@ -11,7 +11,11 @@ namespace DoubleD
 	class DDserver
 	{
 	private:
-		static bool m_isRunning;
+		static std::string m_server_name;
+		static int m_port, m_precision, m_threads;
+		static bool m_is_https, m_error, m_isRunning;
+
+	private:
 		static boost::mutex m_storageMutex;
 		static std::vector<Lock> m_lockVector;
 
@@ -19,12 +23,12 @@ namespace DoubleD
 		//functions used to define the settings of the server
 		static void m_errormsg(const char* message);
 		static bool m_isDigit(std::string str);
-		static void m_handlePrefixes(char* _argv[], int& _port, int& _precision, int& _threads, bool& _is_https, bool& _error, int value);
+		static void m_handlePrefixes(char* _argv[], int _argc);
 
 		//functions that are being used to define runtime situations
-		static void m_startup(const unsigned int PORTNUM, const unsigned int NUMOFTHREADS, const unsigned int PRECISION, const bool HTTPS);
-		static bool m_reqTimedout(unsigned int timeout, std::string lockName, const unsigned int PRECISION);
-		static void m_checkLifetimes(const unsigned int PRECISION);
+		static void m_startup();
+		static bool m_reqTimedout(unsigned int timeout, std::string lockName);
+		static void m_checkLifetimes();
 		static bool m_keyVerified(std::string key);
 
 	public:
