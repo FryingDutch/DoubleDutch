@@ -1,6 +1,6 @@
 # DoubleDutch: a distributed advisory lock
 
-**DoubleDutch** is a C++ program that coordinates distributed access to shared resources, such as databases or file systems. Clients make requests to DoubleDutch, asking for exclusive usage of a resource (or permission to perform a one-time task). Once the client is finished (or timed-out), the lock is released and ready to be acquired by another client. This project is inspired by MySQL's `GET_LOCK` [function](https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock). DoubleDutch is a https server, based on [CrowCpp](https://github.com/CrowCpp/crow/tree/master). 
+**DoubleDutch** is a C++ program that coordinates distributed access to shared resources, such as databases or file systems. Clients make requests to DoubleDutch, asking for exclusive usage of a resource (or permission to perform a one-time task). Once the client is finished (or timed-out), the lock is released and ready to be acquired by another client. This project is inspired by MySQL's `GET_LOCK` [function](https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock). DoubleDutch is a http(s) server, based on [CrowCpp](https://github.com/CrowCpp/crow/tree/master). 
 
 
 ## Usage
@@ -58,15 +58,12 @@ h 0
 
 for example:
 ```
-docker run -p 8000:8000 server 8000 t 12 p 100 h 0
 #OR
 docker run -p 8000:8000 server 8000 t 4
 #OR
 docker run -p 8000:8000 server 8000 p 250 h 0
 #OR
-docker run -p 8000:8000 server 8000 h 0 t 11
-#OR
-docker run -p 8000:8000 server 8000 h 0
+docker run -p 8000:8000 server 8000 h 0 t 12 p 100
 
 #etc
 ```
