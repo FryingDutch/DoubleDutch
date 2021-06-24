@@ -21,7 +21,7 @@ namespace DoubleD
     bool DDserver::m_is_https = true;
     bool DDserver::m_error = false;
     bool DDserver::m_isRunning = true;
-    bool DDserver::m_sibbling_key_needed;
+    bool DDserver::m_sibbling_key_needed = false;
 
     std::vector<Lock> DDserver::m_lockVector;
     boost::mutex DDserver::m_storageMutex;
