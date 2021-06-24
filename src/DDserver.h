@@ -11,9 +11,9 @@ namespace DoubleD
 	class DDserver
 	{
 	private:
-		static std::string m_server_name;
+		static std::string m_server_name, m_crt_file_path, m_key_file_path;
 		static int m_port, m_precision, m_threads;
-		static bool m_is_https, m_error, m_isRunning;
+		static bool m_is_https, m_error, m_isRunning, m_sibbling_key_needed;
 
 	private:
 		static boost::mutex m_storageMutex;
