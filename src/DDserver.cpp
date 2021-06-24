@@ -10,7 +10,7 @@
 
 namespace DoubleD
 {
-    std::string m_server_name = "DoubleDutch/v0.1";
+    std::string DDserver::m_server_name = "DoubleDutch/v0.1";
 
     int DDserver::m_port = 1;
     int DDserver::m_precision = 333;
@@ -22,7 +22,7 @@ namespace DoubleD
 
     std::vector<Lock> DDserver::m_lockVector;
     boost::mutex DDserver::m_storageMutex;
-    
+
 
     DDserver::DDserver()
     {}
@@ -56,10 +56,10 @@ namespace DoubleD
             DDserver::m_port = std::stoi(_argv[1]);
 
             //for every prefix check and assign the user input to the correct variable
-            for (int i = 2; i < _argc; i+=2)
+            for (int i = 2; i < _argc; i += 2)
             {
                 //if the value next to the prefix is a digit
-                if (DDserver::m_isDigit(_argv[i+1]))
+                if (DDserver::m_isDigit(_argv[i+1]) && *_argv[i] != 'n')
                 {
                     switch (*_argv[i])
                     {
@@ -88,6 +88,11 @@ namespace DoubleD
                         DDserver::m_error = true;
                         break;
                     }
+                }
+
+                else if (*_argv[i] == 'n')
+                {
+                    DDserver::m_server_name = _argv[i+1];
                 }
 
                 else
@@ -267,7 +272,7 @@ namespace DoubleD
         std::thread th1(&DDserver::m_checkLifetimes);
         if (DDserver::m_is_https == true)
         {
-            app.port(DDserver::m_port).server_name("DoubleDutch/v0.1").ssl_file("../SSL/certificate.crt", "../SSL/privateKey.key").concurrency(DDserver::m_threads).run();
+            app.port(DDserver::m_port).server_name(DDserver::m_server_name).ssl_file("../SSL/certificate.crt", "../SSL/privateKey.key").concurrency(DDserver::m_threads).run();
         }
 
         else
