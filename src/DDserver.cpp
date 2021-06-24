@@ -10,9 +10,19 @@
 
 namespace DoubleD
 {
+    std::string m_server_name = "DoubleDutch/v0.1";
+
+    int DDserver::m_port = 1;
+    int DDserver::m_precision = 333;
+    int DDserver::m_threads = std::thread::hardware_concurrency();
+
+    bool DDserver::m_is_https = true;
+    bool DDserver::m_error = false;
+    bool DDserver::m_isRunning = true;
+
     std::vector<Lock> DDserver::m_lockVector;
     boost::mutex DDserver::m_storageMutex;
-    bool DDserver::m_isRunning = true;
+    
 
     DDserver::DDserver()
     {}
@@ -35,7 +45,7 @@ namespace DoubleD
         return true;
     }
 
-    void DDserver::m_handlePrefixes(char* _argv[], int& _port, int& _precision, int& _threads, bool& _is_https, bool& _error, int _argc)
+    void DDserver::m_handlePrefixes(char* _argv[], int _argc)
     {
         //if the argument count is higher then one (Need at least portnumber)
         //and the argument count is even (every prefix needs a value)
@@ -43,7 +53,7 @@ namespace DoubleD
         if (_argc > 1 && _argc % 2 == 0 && DDserver::m_isDigit(_argv[1]))
         {
             //set the port number
-            _port = std::stoi(_argv[1]);
+            DDserver::m_port = std::stoi(_argv[1]);
 
             //for every prefix check and assign the user input to the correct variable
             for (int i = 2; i < _argc; i+=2)
@@ -54,36 +64,35 @@ namespace DoubleD
                     switch (*_argv[i])
                     {
                     case 'p':
-                        _precision = std::stoi(_argv[i+1]);
+                        DDserver::m_precision = std::stoi(_argv[i+1]);
                         break;
 
                     case 't':
-                        _threads = std::stoi(_argv[i+1]);
+                        DDserver::m_threads = std::stoi(_argv[i+1]);
                         break;
 
                     case 'h':
                         if (std::stoi(_argv[i+1]) == 0)
                         {
-                            _is_https = false;
+                            DDserver::m_is_https = false;
                         }
                         else
                         {
                             DDserver::m_errormsg("h only takes 0 as an argument");
-                            _error = true;
+                            DDserver::m_error = true;
                         }
                         break;
 
                     default:
                         DDserver::m_errormsg("Not a valid prefix");
-                        _error = true;
+                        DDserver::m_error = true;
                         break;
                     }
                 }
 
                 else
                 {
-                    _error = true;
-                    std::cout << i << std::endl;
+                    DDserver::m_error = true;
                     DDserver::m_errormsg("Not a digit");
                     break;
                 }
@@ -92,26 +101,20 @@ namespace DoubleD
 
         else
         {
-            _error = true;
+            DDserver::m_error = true;
             DDserver::m_errormsg("Not a valid input");
         }
     }
 
     void DDserver::m_setAndBoot(int _argc, char* _argv[])
     {
-        int _port = 1;
-        int _precision = 333;
-        int _threads = std::thread::hardware_concurrency();
-        bool _is_https = true;
-        bool _error = false;
+        DDserver::m_handlePrefixes(_argv, _argc);
 
-        DDserver::m_handlePrefixes(_argv, _port, _precision, _threads, _is_https, _error, _argc);
-
-        if (_port > 0 && _precision > 0 && _threads > 0)
+        if (DDserver::m_port > 0 && DDserver::m_threads > 0 && DDserver::m_precision > 0)
         {
-            if (_error == false)
+            if (DDserver::m_error == false)
             {
-                DDserver::m_startup(_port, _threads, _precision, _is_https);
+                DDserver::m_startup();
             }
         }
 
@@ -122,10 +125,9 @@ namespace DoubleD
     }
 
     //runtime functions
-    void DDserver::m_startup(const unsigned int PORTNUM, const unsigned int NUMOFTHREADS, const unsigned int PRECISION, const bool HTTPS) 
+    void DDserver::m_startup() 
     {
         crow::SimpleApp app;
-        CROW_ROUTE(app, "/")([]() { return "Welcome to DoubleDutch"; });
 
         CROW_ROUTE(app, "/status")
             ([&] (const crow::request& req){
@@ -211,10 +213,10 @@ namespace DoubleD
                     }
 
 
-                    if (DDserver::m_reqTimedout(timeout, lockName, PRECISION))
+                    if (DDserver::m_reqTimedout(timeout, lockName))
                     {
                         x["status"] = "timed out";
-                        return crow::response(408, x);
+                        return crow::response(200, x);
                     }
 
                     else
@@ -262,26 +264,26 @@ namespace DoubleD
             return crow::response(400, x);
                 });
 
-        std::thread th1(&DDserver::m_checkLifetimes, PRECISION);
-        if (HTTPS == true)
+        std::thread th1(&DDserver::m_checkLifetimes);
+        if (DDserver::m_is_https == true)
         {
-            app.port(PORTNUM).ssl_file("../SSL/certificate.crt", "../SSL/privateKey.key").concurrency(NUMOFTHREADS).run();
+            app.port(DDserver::m_port).server_name("DoubleDutch/v0.1").ssl_file("../SSL/certificate.crt", "../SSL/privateKey.key").concurrency(DDserver::m_threads).run();
         }
 
         else
         {
-            app.port(PORTNUM).concurrency(NUMOFTHREADS).run();
+            app.port(DDserver::m_port).concurrency(DDserver::m_threads).run();
         }
 
         DDserver::m_isRunning = false;
         th1.join();
     }
 
-    void DDserver::m_checkLifetimes(const unsigned int PRECISION)
+    void DDserver::m_checkLifetimes()
     {
         while (DDserver::m_isRunning)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(PRECISION));
+            std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::m_precision));
             DDserver::m_storageMutex.lock();
             for (unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
             {
@@ -295,7 +297,7 @@ namespace DoubleD
         }
     }
 
-    bool DDserver::m_reqTimedout(const unsigned int TIMEOUT, std::string lockName, const unsigned int PRECISION)
+    bool DDserver::m_reqTimedout(const unsigned int TIMEOUT, std::string lockName)
     {
         auto startTime = std::chrono::high_resolution_clock::now();
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -327,7 +329,7 @@ namespace DoubleD
 
             if (difference.count() < TIMEOUT)
             {
-                std::this_thread::sleep_for(std::chrono::milliseconds(PRECISION));
+                std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::m_precision));
             }            
 
         } while (difference.count() < TIMEOUT);
