@@ -9,7 +9,7 @@ RUN apt-get install libssl-dev
 RUN apt-get install -yq git
 
 # get crow's include/ dir
-RUN git clone --branch 0.2 https://github.com/CrowCpp/crow
+RUN git clone --branch v0.3 https://github.com/CrowCpp/crow
 RUN cp -r crow/include include
 
 # make a directory we'll use to build
