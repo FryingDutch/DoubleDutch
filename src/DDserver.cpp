@@ -11,6 +11,8 @@
 namespace DoubleD
 {
     std::string DDserver::m_server_name = "DoubleDutch/v0.1";
+    std::string DDserver::m_crt_file_path = "../SSL/certificate.crt";
+    std::string DDserver::m_key_file_path = "../SSL/privateKey.key";
 
     int DDserver::m_port = 1;
     int DDserver::m_precision = 333;
@@ -19,6 +21,7 @@ namespace DoubleD
     bool DDserver::m_is_https = true;
     bool DDserver::m_error = false;
     bool DDserver::m_isRunning = true;
+    bool DDserver::m_sibbling_key_needed;
 
     std::vector<Lock> DDserver::m_lockVector;
     boost::mutex DDserver::m_storageMutex;
@@ -59,7 +62,7 @@ namespace DoubleD
             for (int i = 2; i < _argc; i += 2)
             {
                 //if the value next to the prefix is a digit
-                if (DDserver::m_isDigit(_argv[i+1]) && *_argv[i] != 'n')
+                if (DDserver::m_isDigit(_argv[i+1]))
                 {
                     switch (*_argv[i])
                     {
@@ -90,16 +93,29 @@ namespace DoubleD
                     }
                 }
 
-                else if (*_argv[i] == 'n')
-                {
-                    DDserver::m_server_name = _argv[i+1];
-                }
-
                 else
                 {
-                    DDserver::m_error = true;
-                    DDserver::m_errormsg("Not a digit");
-                    break;
+                    switch (*_argv[i])
+                    {
+                    case 'n':
+                        DDserver::m_server_name = _argv[i+1];
+                        break;
+
+                    case 'c':
+                        DDserver::m_crt_file_path = _argv[i+1];
+                        DDserver::m_sibbling_key_needed = !DDserver::m_sibbling_key_needed;
+                        break;
+
+                    case 'k':
+                        DDserver::m_key_file_path = _argv[i+1];
+                        DDserver::m_sibbling_key_needed = !DDserver::m_sibbling_key_needed;
+                        break;
+
+                    default:
+                        DDserver::m_errormsg("Not a valid prefix");
+                        DDserver::m_error = true;
+                        break;
+                    }
                 }
             }
         }
@@ -119,7 +135,15 @@ namespace DoubleD
         {
             if (DDserver::m_error == false)
             {
-                DDserver::m_startup();
+                if (DDserver::m_sibbling_key_needed == false)
+                {
+                    DDserver::m_startup();
+                }
+
+                else
+                {
+                    DDserver::m_errormsg("Need both crt and key file");
+                }
             }
         }
 
@@ -272,7 +296,15 @@ namespace DoubleD
         std::thread th1(&DDserver::m_checkLifetimes);
         if (DDserver::m_is_https == true)
         {
-            app.port(DDserver::m_port).server_name(DDserver::m_server_name).ssl_file("../SSL/certificate.crt", "../SSL/privateKey.key").concurrency(DDserver::m_threads).run();
+            try
+            {
+                app.port(DDserver::m_port).server_name(DDserver::m_server_name).ssl_file(DDserver::m_crt_file_path, DDserver::m_key_file_path).concurrency(DDserver::m_threads).run();
+            }
+
+            catch (...)
+            {
+                DDserver::m_errormsg("Invalid key or crt file path");
+            }
         }
 
         else
