@@ -36,6 +36,7 @@ To run and listen for connections on port 8000:
 ```
 docker run -p 8000:8000 server 8000
 ```
+## Customisation
 **Besides the default settings, DoubleDutch offers optional customisation.**
 
 - **Name:** Give the server your own name. This is especially usefull when you want to use multiple servers for different applications.
