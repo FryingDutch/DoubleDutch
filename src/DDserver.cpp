@@ -277,7 +277,7 @@ namespace DoubleD
 
         else
         {
-            app.port(DDserver::m_port).concurrency(DDserver::m_threads).run();
+            app.port(DDserver::m_port).server_name(DDserver::m_server_name).concurrency(DDserver::m_threads).run();
         }
 
         DDserver::m_isRunning = false;
