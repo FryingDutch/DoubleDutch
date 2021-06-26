@@ -43,38 +43,36 @@ docker run -p 8000:8000 server 8000
 ```
 n myServerName
 ```
-
 - **Precision:** this effects the amount of time a thread sleeps(ms) in between cycles. Specifically where a request is waiting for a lock to be possibly freed. And also in a  the dedicated thread that checks the lifetimes of the current locks. By default this is 333ms.
 ```
 p 333
 ```
-
 - **Threads:** The amount of threads the program will use. By default this is 8
 ```
 t 8
 ```
-
 - **HTTPS:** If the user wants to disable HTTPS. Only option here is 0 (which makes the program run on http). HTTPS is on by default.
 ```
 h 0
 ```
-
 - **.crt & .key:** If you use a different name for the "privateKey.key" or the "certificate.crt" file, you will have to give notice to DoubleDutch:
 ```
 c newcertificate.crt
 #OR
 k differentKey.key
 ```
+- **API-key:** If you rather not have your API-key in a file, you can also call it as an argument(config file still can't be empty though!):
+```
+a myRandomApiKeyString
+```
+
 for example:
 ```
+docker run -p 8000:8000 server 8000 n myOwnserver h 0
 #OR
-docker run -p 8000:8000 server 8000 n myOwnserver
+docker run -p 8000:8000 server 8000 p 250 k differentKey.key
 #OR
-docker run -p 8000:8000 server 8000 p 250 h 0 k differentKey.key
-#OR
-docker run -p 8000:8000 server 8000 h 0 n myOwnServer p 100
-#OR
-docker run -p 8000:8000 server 8000 p 175 t 6 n myOwnServer h 0
+docker run -p 8000:8000 server 8000 t 12 a myRandomString c newcert.crt
 
 #etc
 ```
