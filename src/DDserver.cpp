@@ -13,7 +13,7 @@ namespace DoubleD
     std::string DDserver::m_server_name = "DoubleDutch/v0.1";
     std::string DDserver::m_crt_file_path = "../SSL/certificate.crt";
     std::string DDserver::m_key_file_path = "../SSL/privateKey.key";
-    std::string DDserver::m_api_key = DDserver::m_loadApiKey();
+    std::string DDserver::m_api_key;
 
     int DDserver::m_port = 1;
     int DDserver::m_precision = 333;
@@ -128,8 +128,38 @@ namespace DoubleD
         }
     }
 
+    void DDserver::m_loadApiKey()
+    {
+        std::ifstream file("../config.txt", std::ios::in);
+
+        if (file.is_open())
+        {
+            std::string _str;
+            std::getline(file, _str);
+            file.close();
+
+            if (_str == "")
+            {
+                DDserver::m_api_key = _str;                
+            }
+
+            else
+            {
+                DDserver::m_errormsg("Empty key file");
+                DDserver::m_error = true;
+            }
+        }
+
+        else
+        {
+            DDserver::m_errormsg("No key file found");
+            DDserver::m_error = true;
+        }
+    }
+
     void DDserver::m_setAndBoot(int _argc, char* _argv[])
     {
+        DDserver::m_loadApiKey();
         DDserver::m_handlePrefixes(_argv, _argc);
 
         if (DDserver::m_port > 0 && DDserver::m_threads > 0 && DDserver::m_precision > 0)
@@ -372,29 +402,5 @@ namespace DoubleD
 
         } while (difference.count() < TIMEOUT);
         return true;
-    }
-
-    std::string DDserver::m_loadApiKey()
-    {
-        std::ifstream file("../config.txt", std::ios::in);
-
-        if (file.is_open())
-        {
-            std::string tempStr;
-            std::getline(file, tempStr);
-            file.close();
-
-            return tempStr;
-        }
-
-        else
-        {
-            DDserver::m_errormsg("No key file found");
-            std::string str = "error";
-            DDserver::m_error = true;
-            return str;
-        }
-    }
-
-    
+    }    
 }
