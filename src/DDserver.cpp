@@ -34,6 +34,7 @@ namespace DoubleD
     //setting functions
     void DDserver::m_errormsg(const char* message)
     {
+        DDserver::m_error = true;
         std::cout << "[ERROR]: " << message << "! Terminating...\n";
     }
 
@@ -83,13 +84,11 @@ namespace DoubleD
                         else
                         {
                             DDserver::m_errormsg("h only takes 0 as an argument");
-                            DDserver::m_error = true;
                         }
                         break;
 
                     default:
                         DDserver::m_errormsg("Not a valid prefix");
-                        DDserver::m_error = true;
                         break;
                     }
                 }
@@ -114,7 +113,6 @@ namespace DoubleD
 
                     default:
                         DDserver::m_errormsg("Not a valid prefix");
-                        DDserver::m_error = true;
                         break;
                     }
                 }
@@ -123,7 +121,6 @@ namespace DoubleD
 
         else
         {
-            DDserver::m_error = true;
             DDserver::m_errormsg("Not a valid input");
         }
     }
@@ -146,14 +143,12 @@ namespace DoubleD
             else
             {
                 DDserver::m_errormsg("Empty key file");
-                DDserver::m_error = true;
             }
         }
 
         else
         {
             DDserver::m_errormsg("No key file found");
-            DDserver::m_error = true;
         }
     }
 
@@ -195,12 +190,12 @@ namespace DoubleD
 
             if (req.url_params.get("auth") == nullptr)
             {
-                x["status"] = "no key";
+                x[DDserver::m_server_name] = "no key";
                 return crow::response(400, x);
             }
             else if(DDserver::m_api_key != req.url_params.get("auth"))
             {
-                x["status"] = "invalid key";
+                x[DDserver::m_server_name] = "invalid key";
                 return crow::response(401, x);
             }
 
@@ -208,16 +203,16 @@ namespace DoubleD
             if (DDserver::m_lockVector.size() > 0)
             {
                 for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
-                    x["status"][i]["name"] = DDserver::m_lockVector[i].m_getName();
-                    x["status"][i]["token"] = DDserver::m_lockVector[i].m_getSessionToken();
-                    x["status"][i]["remaining"] = DDserver::m_lockVector[i].m_timeLeft();
+                    x[DDserver::m_server_name][i]["name"] = DDserver::m_lockVector[i].m_getName();
+                    x[DDserver::m_server_name][i]["token"] = DDserver::m_lockVector[i].m_getSessionToken();
+                    x[DDserver::m_server_name][i]["remaining"] = DDserver::m_lockVector[i].m_timeLeft();
                 }
                 DDserver::m_storageMutex.unlock();
                 return crow::response(200, x);
             }
             else 
             { 
-                x["status"] = "empty"; 
+                x[DDserver::m_server_name] = "empty"; 
                 DDserver::m_storageMutex.unlock(); 
                 return crow::response(200, x); 
             }
@@ -227,14 +222,14 @@ namespace DoubleD
             ([&](const crow::request& req)
             {
                     crow::json::wvalue x;
-                    x["status"] = false;
+                    x[DDserver::m_server_name] = false;
 
                     std::string lockName;
                     double lifetime, timeout;
 
                     if (req.url_params.get("lockname") == nullptr || req.url_params.get("auth") == nullptr)
                     {
-                        x["status"] = "invalid params";
+                        x[DDserver::m_server_name] = "invalid params";
                         return crow::response(400, x);
                     }
 
@@ -247,7 +242,7 @@ namespace DoubleD
 
                         else
                         {
-                            x["status"] = "invalid key";
+                            x[DDserver::m_server_name] = "invalid key";
                             return crow::response(401, x);
                         }
                     }
@@ -272,10 +267,9 @@ namespace DoubleD
                         timeout = 0.0f;
                     }
 
-
                     if (DDserver::m_reqTimedout(timeout, lockName))
                     {
-                        x["status"] = "timed out";
+                        x[DDserver::m_server_name] = "timed out";
                         return crow::response(200, x);
                     }
 
@@ -284,7 +278,7 @@ namespace DoubleD
                         Lock tempLock(lockName, lifetime);
                         DDserver::m_lockVector.push_back(tempLock);
                         DDserver::m_storageMutex.unlock();
-                        x["status"] = tempLock.m_getSessionToken();
+                        x[DDserver::m_server_name] = tempLock.m_getSessionToken();
                         return crow::response(200, x);
                     }
             });
@@ -294,10 +288,10 @@ namespace DoubleD
             ([&](const crow::request& req) {
             std::string lockName, user_id;
             crow::json::wvalue x;
-            x["status"] = false;
+            x[DDserver::m_server_name] = false;
             if (req.url_params.get("lockname") == nullptr || req.url_params.get("key") == nullptr)
             {
-                x["status"] = "invalid params";
+                x[DDserver::m_server_name] = "invalid params";
                 return crow::response(400, x);
             }
 
@@ -315,12 +309,12 @@ namespace DoubleD
                     DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
                     DDserver::m_lockVector.shrink_to_fit();
                     DDserver::m_storageMutex.unlock();
-                    x["status"] = "released";
+                    x[DDserver::m_server_name] = "released";
                     return crow::response(200, x);
                 }
             }
             DDserver::m_storageMutex.unlock();
-            x["status"] = "no match";
+            x[DDserver::m_server_name] = "no match";
             return crow::response(400, x);
                 });
 
@@ -334,7 +328,7 @@ namespace DoubleD
 
             catch (...)
             {
-                DDserver::m_errormsg("Invalid key or crt file path");
+                DDserver::m_errormsg("Invalid .key or .crt file path");
             }
         }
 
