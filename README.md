@@ -40,35 +40,37 @@ docker run -p 8000:8000 server 8000
 **Besides the default settings, DoubleDutch offers optional customisation.**
 
 - **Name:** Give the server your own name. This is especially usefull when you want to use multiple servers for different applications.
-
 ```
 n myServerName
 ```
 
 - **Precision:** this effects the amount of time a thread sleeps(ms) in between cycles. Specifically where a request is waiting for a lock to be possibly freed. And also in a  the dedicated thread that checks the lifetimes of the current locks. By default this is 333ms.
-
 ```
 p 333
 ```
 
 - **Threads:** The amount of threads the program will use. By default this is 8
-
 ```
 t 8
 ```
 
 - **HTTPS:** If the user wants to disable HTTPS. Only option here is 0 (which makes the program run on http). HTTPS is on by default.
-
 ```
 h 0
 ```
 
+- **.crt & .key:** If you have renamed the "privateKey.key" or the "certificate.crt" file, you will have to give notice to DoubleDutch:
+```
+c newcertificate.crt
+#OR
+k differentKey.key
+```
 for example:
 ```
 #OR
 docker run -p 8000:8000 server 8000 n myOwnserver
 #OR
-docker run -p 8000:8000 server 8000 p 250 h 0
+docker run -p 8000:8000 server 8000 p 250 h 0 k differentKey.key
 #OR
 docker run -p 8000:8000 server 8000 h 0 n myOwnServer p 100
 #OR
