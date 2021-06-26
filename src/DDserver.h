@@ -11,7 +11,7 @@ namespace DoubleD
 	class DDserver
 	{
 	private:
-		static std::string m_server_name, m_crt_file_path, m_key_file_path;
+		static std::string m_server_name, m_crt_file_path, m_key_file_path, m_api_key;
 		static int m_port, m_precision, m_threads;
 		static bool m_is_https, m_error, m_isRunning, m_sibbling_key_needed;
 
@@ -24,12 +24,12 @@ namespace DoubleD
 		static void m_errormsg(const char* message);
 		static bool m_isDigit(std::string str);
 		static void m_handlePrefixes(char* _argv[], int _argc);
+		static std::string m_loadApiKey();
 
 		//functions that are being used to define runtime situations
 		static void m_startup();
 		static bool m_reqTimedout(unsigned int timeout, std::string lockName);
 		static void m_checkLifetimes();
-		static bool m_keyVerified(std::string key);
 
 	public:
 		DDserver();
