@@ -59,7 +59,7 @@ t 8
 h 0
 ```
 
-- **.crt & .key:** If you have renamed the "privateKey.key" or the "certificate.crt" file, you will have to give notice to DoubleDutch:
+- **.crt & .key:** If you use a different name for the "privateKey.key" or the "certificate.crt" file, you will have to give notice to DoubleDutch:
 ```
 c newcertificate.crt
 #OR
