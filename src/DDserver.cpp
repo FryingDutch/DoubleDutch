@@ -22,7 +22,6 @@ namespace DoubleD
     bool DDserver::m_is_https = true;
     bool DDserver::m_error = false;
     bool DDserver::m_isRunning = true;
-    bool DDserver::m_sibbling_key_needed = false;
 
     std::vector<Lock> DDserver::m_lockVector;
     boost::mutex DDserver::m_storageMutex;
@@ -102,13 +101,11 @@ namespace DoubleD
                         break;
 
                     case 'c':
-                        DDserver::m_crt_file_path = _argv[i+1];
-                        DDserver::m_sibbling_key_needed = !DDserver::m_sibbling_key_needed;
+                        DDserver::m_crt_file_path = DDserver::m_crt_file_path.substr(0, 7) + _argv[i+1];
                         break;
 
                     case 'k':
-                        DDserver::m_key_file_path = _argv[i+1];
-                        DDserver::m_sibbling_key_needed = !DDserver::m_sibbling_key_needed;
+                        DDserver::m_key_file_path = DDserver::m_key_file_path.substr(0, 7) + _argv[i+1];
                         break;
 
                     default:
@@ -148,7 +145,7 @@ namespace DoubleD
 
         else
         {
-            DDserver::m_errormsg("No key file found");
+            DDserver::m_errormsg("No API-key file found");
         }
     }
 
@@ -168,7 +165,7 @@ namespace DoubleD
 
                 else
                 {
-                    DDserver::m_errormsg("Need both crt and key file");
+                    DDserver::m_errormsg("Need both .crt and .key file");
                 }
             }
         }
@@ -319,6 +316,7 @@ namespace DoubleD
                 });
 
         std::thread th1(&DDserver::m_checkLifetimes);
+        DDserver::checkForSignal();
         if (DDserver::m_is_https == true)
         {
             try
