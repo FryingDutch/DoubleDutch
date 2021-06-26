@@ -13,7 +13,7 @@ namespace DoubleD
 	private:
 		static std::string m_server_name, m_crt_file_path, m_key_file_path, m_api_key;
 		static int m_port, m_precision, m_threads;
-		static bool m_is_https, m_error, m_isRunning, m_sibbling_key_needed;
+		static bool m_is_https, m_error, m_isRunning;
 
 	private:
 		static boost::mutex m_storageMutex;
@@ -29,6 +29,8 @@ namespace DoubleD
 		//functions that are being used to define runtime situations
 		static void m_startup();
 		static bool m_reqTimedout(unsigned int timeout, std::string lockName);
+
+		//dedicated thread
 		static void m_checkLifetimes();
 
 	public:
