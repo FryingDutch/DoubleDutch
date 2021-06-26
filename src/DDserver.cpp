@@ -235,7 +235,7 @@ namespace DoubleD
 
                     else
                     {
-                        if (DDserver::m_api_key != req.url_params.get("auth"))
+                        if (DDserver::m_api_key == req.url_params.get("auth"))
                         {
                             lockName = req.url_params.get("lockname");
                         }
