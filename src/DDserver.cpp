@@ -138,7 +138,7 @@ namespace DoubleD
             std::getline(file, _str);
             file.close();
 
-            if (_str == "")
+            if (_str != "")
             {
                 DDserver::m_api_key = _str;                
             }
