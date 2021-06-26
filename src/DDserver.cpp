@@ -108,6 +108,10 @@ namespace DoubleD
                         DDserver::m_key_file_path = DDserver::m_key_file_path.substr(0, 7) + _argv[i+1];
                         break;
 
+                    case 'a':
+                        DDserver::m_api_key = _argv[i + 1];
+                        break;
+
                     default:
                         DDserver::m_errormsg("Not a valid prefix");
                         break;
@@ -158,15 +162,7 @@ namespace DoubleD
         {
             if (DDserver::m_error == false)
             {
-                if (DDserver::m_sibbling_key_needed == false)
-                {
-                    DDserver::m_startup();
-                }
-
-                else
-                {
-                    DDserver::m_errormsg("Need both .crt and .key file");
-                }
+                DDserver::m_startup();                
             }
         }
 
@@ -316,7 +312,6 @@ namespace DoubleD
                 });
 
         std::thread th1(&DDserver::m_checkLifetimes);
-        DDserver::checkForSignal();
         if (DDserver::m_is_https == true)
         {
             try
