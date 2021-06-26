@@ -24,7 +24,7 @@ namespace DoubleD
 		static void m_errormsg(const char* message);
 		static bool m_isDigit(std::string str);
 		static void m_handlePrefixes(char* _argv[], int _argc);
-		static std::string m_loadApiKey();
+		static void m_loadApiKey();
 
 		//functions that are being used to define runtime situations
 		static void m_startup();
