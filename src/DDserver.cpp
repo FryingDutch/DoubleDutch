@@ -22,6 +22,7 @@ namespace DoubleD
     bool DDserver::m_is_https = true;
     bool DDserver::m_error = false;
     bool DDserver::m_isRunning = true;
+    bool DDserver::m_custom_api_key = false;
 
     std::vector<Lock> DDserver::m_lockVector;
     boost::mutex DDserver::m_storageMutex;
@@ -110,6 +111,7 @@ namespace DoubleD
 
                     case 'a':
                         DDserver::m_api_key = _argv[i + 1];
+                        DDserver::m_custom_api_key = true;
                         break;
 
                     default:
@@ -155,8 +157,13 @@ namespace DoubleD
 
     void DDserver::m_setAndBoot(int _argc, char* _argv[])
     {
-        DDserver::m_loadApiKey();
+        
         DDserver::m_handlePrefixes(_argv, _argc);
+
+        if (DDserver::m_custom_api_key == false)
+        {
+            DDserver::m_loadApiKey();
+        }
 
         if (DDserver::m_port > 0 && DDserver::m_threads > 0 && DDserver::m_precision > 0)
         {
@@ -280,8 +287,8 @@ namespace DoubleD
         CROW_ROUTE(app, "/releaseLock")
             ([&](const crow::request& req) {
             std::string lockName, user_id;
-            crow::json::wvalue x;
-            x[DDserver::m_server_name] = false;
+            crow::json::wvalue x; 
+
             if (req.url_params.get("lockname") == nullptr || req.url_params.get("key") == nullptr)
             {
                 x[DDserver::m_server_name] = "invalid params";
@@ -307,7 +314,7 @@ namespace DoubleD
                 }
             }
             DDserver::m_storageMutex.unlock();
-            x[DDserver::m_server_name] = "no match";
+            x[DDserver::m_server_name] = lockName;
             return crow::response(400, x);
                 });
 
