@@ -18,7 +18,7 @@ r = requests.get("https://<host>:<port>/getLock?auth=randomapikey&lockname=lock_
  If the lock to the resource was granted, the client will receive a random string of 32 chararcters that will be needed to release the lock later.
  When using a Python Client, a request to release the lock may look like this:
 ```
-r = requests.get("https://<host>:<port>/releaseLock?lockname=lock_as_string&key="+key)
+r = requests.delete("https://<host>:<port>/releaseLock?lockname=lock_as_string&key="+key)
 ```
   
 ## Installation and set-up
