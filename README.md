@@ -61,7 +61,7 @@ c newcertificate.crt
 #OR
 k differentKey.key
 ```
-- **API-key:** If you rather not have your API-key in a file, you can also call it as an argument(config file still can't be empty though!):
+- **API-key:** If you rather not have your API-key in a file, you can also call it as an argument:
 ```
 a myRandomApiKeyString
 ```
