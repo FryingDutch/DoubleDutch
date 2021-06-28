@@ -134,7 +134,7 @@ namespace DoubleD
         {
             std::ifstream file("../config.txt", std::ios::in);
 
-            if(file.is_open())
+            if (file.is_open())
             {
                 std::string _str;
                 std::getline(file, _str);
@@ -150,11 +150,11 @@ namespace DoubleD
                     DDserver::m_errormsg("Empty key file");
                 }
             }
-        }
 
-        else
-        {
-            DDserver::m_errormsg("No API-key file found");
+            else
+            {
+                DDserver::m_errormsg("No API-key file found");
+            }
         }
     }
 
