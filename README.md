@@ -46,7 +46,7 @@ docker run -p 8000:8000 server 8000
 n myServerName
 ```
 - **Precision:** this effects the amount of time a thread sleeps(ms) in between cycles.  
- Specifically where a request is waiting for a lock to be possibly freed and in the dedicated thread that checks the lifetimes of the current locks.  
+ Specifically when a request is waiting for a lock to be freed and in the dedicated thread that checks the lifetimes of the locks.  
 By default this is 333ms.
 ```bash
 p 333
@@ -62,8 +62,9 @@ HTTPS is on by default.
 ```bash
 h 0
 ```
-- **.crt & .key:** using a different name for these files.  
- If you want to use a different name for the "privateKey.key" or the "certificate.crt" file, you will have to give notice to DoubleDutch:
+- **.crt & .key:** naming the _.crt_ or _.key_ file.  
+ If you want to use a different name for the .crt_ or _.key_ file, you will have to give notice to DoubleDutch.  
+ By default you'll have to use "certificate.crt" and "privateKey.key".
 ```bash
 c newcertificate.crt
 #OR
