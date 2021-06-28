@@ -15,59 +15,67 @@ r = requests.get("https://<host>:<port>/getLock?auth=randomapikey&lockname=lock_
 #-the default timeout is 0 seconds.
 
 ```
- If the lock to the resource was granted, the client will receive a random string of 32 chararcters that will be needed to release the lock later.
+ If the lock to the resource was granted, the client will receive a random string of 32 chararcters you need to release the lock later.  
  When using a Python Client, a request to release the lock may look like this:
-```
+```python
 r = requests.delete("https://<host>:<port>/releaseLock?lockname=lock_as_string&key="+key)
 ```
   
 ## Installation and set-up
-DoubleDutch needs a .crt file named "certificate.crt" and a .key file named "privateKey.key", in order to run on https.
-You will have to place these files in the SSL directory.
-
-The program also uses authentication trough API Key verification. To set the API key, you just edit the config.txt file.
-
+**Requirements:**  
+DoubleDutch needs a _.crt_ file named "certificate.crt" and a _.key_ file named "privateKey.key", in order to run on https.  
+You will have to place these files in the _SSL directory_.  
+The program also uses authentication trough API Key verification. To set the API key, you edit the _config.txt_ file.  
+  
 DoubleDutch runs inside a Docker container. To build using the provided _.Dockerfile_:
 ```bash
 docker build . -t server
 ```
 DoubleDutch needs at least the portnumber from the user.
 To run and listen for connections on port 8000:
-```
+```bash
 docker run -p 8000:8000 server 8000
 ```
 ## Customisation
 **Besides the default settings, DoubleDutch offers optional customisation.**
 
-- **Name:** Give the server your own name. This is especially usefull when you want to use multiple servers for different applications.
-```
+- **Name:** Give the server your own name.  
+ This is especially usefull when you want to use multiple servers for different applications.
+```bash
 n myServerName
 ```
-- **Precision:** this effects the amount of time a thread sleeps(ms) in between cycles. Specifically where a request is waiting for a lock to be possibly freed. And also in a  the dedicated thread that checks the lifetimes of the current locks. By default this is 333ms.
-```
+- **Precision:** this effects the amount of time a thread sleeps(ms) in between cycles.  
+ Specifically where a request is waiting for a lock to be possibly freed and in the dedicated thread that checks the lifetimes of the current locks.  
+By default this is 333ms.
+```bash
 p 333
 ```
-- **Threads:** The amount of threads the program will use. By default this is 8
-```
+- **Threads:** The amount of threads the program will use.  
+By default this is 8
+```bash
 t 8
 ```
-- **HTTPS:** If the user wants to disable HTTPS. Only option here is 0 (which makes the program run on http). HTTPS is on by default.
-```
+- **HTTPS:** If you want to disable HTTPS.  
+ Only option here is 0 (which makes the program run on http).  
+HTTPS is on by default.
+```bash
 h 0
 ```
-- **.crt & .key:** If you use a different name for the "privateKey.key" or the "certificate.crt" file, you will have to give notice to DoubleDutch:
-```
+- **.crt & .key:** using a different name for these files.  
+ If you want to use a different name for the "privateKey.key" or the "certificate.crt" file, you will have to give notice to DoubleDutch:
+```bash
 c newcertificate.crt
 #OR
 k differentKey.key
 ```
-- **API-key:** If you rather not have your API-key in a file, you can also call it as an argument:
-```
+- **API-key:** If you dont want to use the config file.  
+ If you rather not have your API-key in a file, you can also pass it as an argument:
+```bash
 a myRandomApiKeyString
 ```
 
 for example:
-```
+```bash
 docker run -p 8000:8000 server 8000 n myOwnserver h 0
 #OR
 docker run -p 8000:8000 server 8000 p 250 k differentKey.key
