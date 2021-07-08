@@ -327,9 +327,14 @@ namespace DoubleD
                 app.port(DDserver::m_port).server_name(DDserver::m_server_name).ssl_file(DDserver::m_crt_file_path, DDserver::m_key_file_path).concurrency(DDserver::m_threads).run();
             }
 
+            catch (boost::wrapexcept<boost::system::system_error>& error)
+            {
+                DDserver::m_errormsg(".key / .crt file not found");
+            }
+
             catch (...)
             {
-                DDserver::m_errormsg("Invalid .key or .crt file path");
+                DDserver::m_errormsg("Unknown Error has occured");
             }
         }
 
