@@ -53,7 +53,7 @@ By default this is 333ms.
 p 333
 ```
 - **Threads:** The amount of threads the program will use.  
-By default this is 8.
+By default the program makes a hardware check to set the thread amount.
 ```bash
 t 8
 ```
