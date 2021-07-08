@@ -213,7 +213,7 @@ namespace DoubleD
             }
             else 
             { 
-                x[DDserver::m_server_name] = "empty"; 
+                x[DDserver::m_server_name][0] = "empty"; 
                 DDserver::m_storageMutex.unlock(); 
                 return crow::response(200, x); 
             }
@@ -230,7 +230,7 @@ namespace DoubleD
 
                     if (req.url_params.get("lockname") == nullptr || req.url_params.get("auth") == nullptr)
                     {
-                        x[DDserver::m_server_name] = "invalid params";
+                        x[DDserver::m_server_name][0] = "invalid params";
                         return crow::response(400, x);
                     }
 
@@ -243,7 +243,7 @@ namespace DoubleD
 
                         else
                         {
-                            x[DDserver::m_server_name] = "invalid key";
+                            x[DDserver::m_server_name][0] = "invalid key";
                             return crow::response(401, x);
                         }
                     }
@@ -270,7 +270,7 @@ namespace DoubleD
 
                     if (DDserver::m_reqTimedout(timeout, lockName))
                     {
-                        x[DDserver::m_server_name] = "timed out";
+                        x[DDserver::m_server_name][0] = "timed out";
                         return crow::response(200, x);
                     }
 
@@ -279,7 +279,7 @@ namespace DoubleD
                         Lock tempLock(lockName, lifetime);
                         DDserver::m_lockVector.push_back(tempLock);
                         DDserver::m_storageMutex.unlock();
-                        x[DDserver::m_server_name] = tempLock.m_getSessionToken();
+                        x[DDserver::m_server_name][0] = tempLock.m_getSessionToken();
                         return crow::response(200, x);
                     }
             });
@@ -292,7 +292,7 @@ namespace DoubleD
 
             if (req.url_params.get("lockname") == nullptr || req.url_params.get("token") == nullptr)
             {
-                x[DDserver::m_server_name] = "invalid params";
+                x[DDserver::m_server_name][0] = "invalid params";
                 return crow::response(400, x);
             }
 
@@ -310,12 +310,12 @@ namespace DoubleD
                     DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
                     DDserver::m_lockVector.shrink_to_fit();
                     DDserver::m_storageMutex.unlock();
-                    x[DDserver::m_server_name] = "released";
+                    x[DDserver::m_server_name][0] = "released";
                     return crow::response(200, x);
                 }
             }
             DDserver::m_storageMutex.unlock();
-            x[DDserver::m_server_name] = lockName;
+            x[DDserver::m_server_name][0] = lockName;
             return crow::response(400, x);
                 });
 
