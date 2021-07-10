@@ -4,4 +4,4 @@ data = requests.get("http://localhost:8000/getlock?auth=randomapikey&lockname=he
 token = data["DoubleDutch/v0.1"][0]       
 #print(key)
 
-data = requests.get("http://localhost:8000/releaselock?lockname=hello&token="+token).json()
+data = requests.delete("http://localhost:8000/releaselock?lockname=hello&token="+token).json()
