@@ -64,20 +64,20 @@ namespace DoubleD
             for (int i = 2; i < _argc; i += 2)
             {
                 //if the value next to the prefix is a digit
-                if (DDserver::m_isDigit(_argv[i+1]))
+                if (DDserver::m_isDigit(_argv[i + 1]))
                 {
                     switch (*_argv[i])
                     {
                     case 'p':
-                        DDserver::m_precision = std::stoi(_argv[i+1]);
+                        DDserver::m_precision = std::stoi(_argv[i + 1]);
                         break;
 
                     case 't':
-                        DDserver::m_threads = std::stoi(_argv[i+1]);
+                        DDserver::m_threads = std::stoi(_argv[i + 1]);
                         break;
 
                     case 'h':
-                        if (std::stoi(_argv[i+1]) == 0)
+                        if (std::stoi(_argv[i + 1]) == 0)
                         {
                             DDserver::m_is_https = false;
                         }
@@ -98,15 +98,15 @@ namespace DoubleD
                     switch (*_argv[i])
                     {
                     case 'n':
-                        DDserver::m_server_name = _argv[i+1];
+                        DDserver::m_server_name = _argv[i + 1];
                         break;
 
                     case 'c':
-                        DDserver::m_crt_file_path = DDserver::m_crt_file_path.substr(0, 7) + _argv[i+1];
+                        DDserver::m_crt_file_path = DDserver::m_crt_file_path.substr(0, 7) + _argv[i + 1];
                         break;
 
                     case 'k':
-                        DDserver::m_key_file_path = DDserver::m_key_file_path.substr(0, 7) + _argv[i+1];
+                        DDserver::m_key_file_path = DDserver::m_key_file_path.substr(0, 7) + _argv[i + 1];
                         break;
 
                     case 'a':
@@ -161,16 +161,16 @@ namespace DoubleD
 
     void DDserver::m_setAndBoot(int _argc, char* _argv[])
     {
-        
+
         DDserver::m_handlePrefixes(_argv, _argc);
         DDserver::m_loadApiKey();
-        
+
 
         if (DDserver::m_port > 0 && DDserver::m_threads > 0 && DDserver::m_precision > 0)
         {
             if (DDserver::m_error == false)
             {
-                DDserver::m_startup();                
+                DDserver::m_startup();
             }
         }
 
@@ -181,12 +181,12 @@ namespace DoubleD
     }
 
     //runtime functions
-    void DDserver::m_startup() 
+    void DDserver::m_startup()
     {
         crow::SimpleApp app;
 
         CROW_ROUTE(app, "/status")
-            ([&] (const crow::request& req){
+            ([&](const crow::request& req) {
             crow::json::wvalue x;
 
             if (req.url_params.get("auth") == nullptr)
@@ -194,7 +194,7 @@ namespace DoubleD
                 x[DDserver::m_server_name] = "no key";
                 return crow::response(400, x);
             }
-            else if(DDserver::m_api_key != req.url_params.get("auth"))
+            else if (DDserver::m_api_key != req.url_params.get("auth"))
             {
                 x[DDserver::m_server_name] = "invalid key";
                 return crow::response(401, x);
@@ -211,17 +211,17 @@ namespace DoubleD
                 DDserver::m_storageMutex.unlock();
                 return crow::response(200, x);
             }
-            else 
-            { 
-                x[DDserver::m_server_name][0] = "empty"; 
-                DDserver::m_storageMutex.unlock(); 
-                return crow::response(200, x); 
+            else
+            {
+                x[DDserver::m_server_name][0] = "empty";
+                DDserver::m_storageMutex.unlock();
+                return crow::response(200, x);
             }
-            });
+                });
 
         CROW_ROUTE(app, "/getlock")
             ([&](const crow::request& req)
-            {
+                {
                     crow::json::wvalue x;
                     x[DDserver::m_server_name] = false;
 
@@ -268,27 +268,15 @@ namespace DoubleD
                         timeout = 0.0f;
                     }
 
-                    if (DDserver::m_reqTimedout(timeout, lockName))
-                    {
-                        x[DDserver::m_server_name][0] = "timed out";
-                        return crow::response(200, x);
-                    }
-
-                    else
-                    {
-                        Lock tempLock(lockName, lifetime);
-                        DDserver::m_lockVector.push_back(tempLock);
-                        DDserver::m_storageMutex.unlock();
-                        x[DDserver::m_server_name][0] = tempLock.m_getSessionToken();
-                        return crow::response(200, x);
-                    }
-            });
+                    x[DDserver::m_server_name][0] = DDserver::m_handleRequest(timeout, lockName, lifetime);
+                    return crow::response(200, x);
+                });
 
         // Releasing the lock
         CROW_ROUTE(app, "/releaselock").methods("DELETE"_method)
             ([&](const crow::request& req) {
             std::string lockName, session_token;
-            crow::json::wvalue x; 
+            crow::json::wvalue x;
 
             if (req.url_params.get("lockname") == nullptr || req.url_params.get("token") == nullptr)
             {
@@ -304,7 +292,7 @@ namespace DoubleD
 
             DDserver::m_storageMutex.lock();
             for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
-                
+
                 if (lockName == DDserver::m_lockVector[i].m_getName() &&
                     session_token == DDserver::m_lockVector[i].m_getSessionToken()) {
                     DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
@@ -365,7 +353,7 @@ namespace DoubleD
         }
     }
 
-    bool DDserver::m_reqTimedout(const unsigned int TIMEOUT, std::string lockName)
+    std::string DDserver::m_handleRequest(const unsigned int TIMEOUT, std::string lockName, const double LIFETIME)
     {
         auto startTime = std::chrono::high_resolution_clock::now();
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -373,9 +361,13 @@ namespace DoubleD
         do
         {
             DDserver::m_storageMutex.lock();
+            
             if (DDserver::m_lockVector.size() == 0)
             {
-                return false;
+                Lock lock(lockName, LIFETIME);
+                DDserver::m_lockVector.push_back(lock);
+                DDserver::m_storageMutex.unlock();
+                return lock.m_getSessionToken();
             }
 
             for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
@@ -387,7 +379,10 @@ namespace DoubleD
 
                 else if (i == DDserver::m_lockVector.size() - 1)
                 {
-                    return false;
+                    Lock lock(lockName, LIFETIME);
+                    DDserver::m_lockVector.push_back(lock);
+                    DDserver::m_storageMutex.unlock();
+                    return lock.m_getSessionToken();
                 }
             }
             DDserver::m_storageMutex.unlock();
@@ -398,9 +393,11 @@ namespace DoubleD
             if (difference.count() < TIMEOUT)
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::m_precision));
-            }            
+            }
 
         } while (difference.count() < TIMEOUT);
-        return true;
-    }    
+        
+        std::string ep = "timeout";
+        return ep;
+    }
 }
