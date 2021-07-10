@@ -7,10 +7,10 @@
 Any client that can communicate over http(s), can use the server. When using a Python client, a request to access the `database` resource may look like:
 ```python
 # try to acquire the lock on the database:
-r = requests.get("https://<host>:<port>/getLock?auth=randomapikey&lockname=lock_as_string&timeout=3&lifetime=20")
+r = requests.get("https://<host>:<port>/getlock?auth=randomapikey&lockname=lock_as_string&timeout=3&lifetime=20")
 
 #OR
-r = requests.get("https://<host>:<port>/getLock?auth=randomapikey&lockname=lock_as_string")
+r = requests.get("https://<host>:<port>/getlock?auth=randomapikey&lockname=lock_as_string")
 #-the default lifetime is 30 seconds.
 #-the default timeout is 0 seconds.
 
@@ -19,7 +19,7 @@ r = requests.get("https://<host>:<port>/getLock?auth=randomapikey&lockname=lock_
  that you need to release the lock later.  
  When using a Python Client, a request to release the lock may look like this:
 ```python
-r = requests.delete("https://<host>:<port>/releaseLock?lockname=lock_as_string&key="+key)
+r = requests.delete("https://<host>:<port>/releaselock?lockname=lock_as_string&token="+token)
 ```
   
 ## Installation and set-up
@@ -64,7 +64,7 @@ HTTPS is on by default.
 h 0
 ```
 - **.crt & .key:** naming the _.crt_ or _.key_ file.  
- If you want to use a different name for the .crt_ or _.key_ file, you will have to give notice to DoubleDutch.  
+ If you want to use a different name for the _.crt_ or _.key_ file, you will have to give notice to DoubleDutch.  
  By default you'll have to use "certificate.crt" and "privateKey.key".
 ```bash
 c newcertificate.crt
