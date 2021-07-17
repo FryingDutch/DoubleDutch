@@ -7,6 +7,7 @@
 #include <vector>
 #include <thread>
 #include "DDserver.h"
+#include <boost/optional.hpp>
 
 
 namespace DoubleD
@@ -191,7 +192,7 @@ namespace DoubleD
 
             if (req.url_params.get("auth") == nullptr)
             {
-                x["status"] = "no key";
+                x["status"] = "no api key";
                 return crow::response(400, x);
             }
             else if (DDserver::m_api_key != req.url_params.get("auth"))
@@ -311,28 +312,29 @@ namespace DoubleD
         });
 
         std::thread th1(&DDserver::m_checkLifetimes);
+
+        // configure the app instance with given parameters
+        app.port(DDserver::m_port).server_name(DDserver::m_server_name).concurrency(DDserver::m_threads).run();
         if (DDserver::m_is_https == true)
         {
-            try
-            {
-                app.port(DDserver::m_port).server_name(DDserver::m_server_name).ssl_file(DDserver::m_crt_file_path, DDserver::m_key_file_path).concurrency(DDserver::m_threads).run();
-            }
-
-            catch (boost::wrapexcept<boost::system::system_error>& error)
-            {
-                DDserver::m_errormsg(".key / .crt file not found");
-            }
-
-            catch (...)
-            {
-                DDserver::m_errormsg("Unknown Error has occured");
-            }
+            app.ssl_file(DDserver::m_crt_file_path, DDserver::m_key_file_path);
         }
 
-        else
+        try 
         {
-            app.port(DDserver::m_port).server_name(DDserver::m_server_name).concurrency(DDserver::m_threads).run();
+            app.run();
         }
+
+        catch (boost::wrapexcept<boost::system::system_error>& error)
+        {
+            DDserver::m_errormsg(".key / .crt file not found");
+        }
+
+        catch (...)
+        {
+            DDserver::m_errormsg("Unknown Error has occured");
+        }
+        
 
         DDserver::m_isRunning = false;
         th1.join();
@@ -360,7 +362,7 @@ namespace DoubleD
     // returns a Lock if a Lock can be acquired, otherwise returns boost::none.
     boost::optional<Lock> DDserver::m_getLock(std::string lockName, const double LIFETIME){
         
-        bool free {true}; // whether the lock with <lockName> is available
+        bool free {true}; // whether the lock with <lockName> is free/available
         DDserver::m_storageMutex.lock();
         for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
             {
@@ -371,27 +373,31 @@ namespace DoubleD
                 }
             }
         
-        // if the lock is available, create and store the lock
-        boost::optional<Lock> lock = Lock("", 30.0f);
-        if (free){
+        // create a lock, store and return it if applicable
+        boost::optional<Lock> lock; 
+        if (free) {
             lock = Lock(lockName, LIFETIME);
             DDserver::m_lockVector.push_back(lock.get());
         }
         DDserver::m_storageMutex.unlock();
         return boost::make_optional(free, lock);
+
     }
 
     // calls m_getLock until a lock has been acquired. Returns boost::none if timed-out. 
     boost::optional<Lock> DDserver::m_handleRequest(std::string lockName, const unsigned int TIMEOUT, const double LIFETIME)
     {
         auto startTime = std::chrono::high_resolution_clock::now();
-
-        boost::optional<Lock> lock = DDserver::m_getLock(lockName, LIFETIME);
-        while (!lock && (std::chrono::high_resolution_clock::now() - startTime).count() < TIMEOUT)
-        {  
+        int tries = 0;
+        do {  
+            boost::optional<Lock> lock = DDserver::m_getLock(lockName, LIFETIME);
+            std::cout << "got here!\n";
+            if(lock) return lock;
+            tries ++;
             std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::m_precision));
-            lock = DDserver::m_getLock(lockName, LIFETIME);
-        } 
+        } while (tries < 10);  // difference < count
+        boost::optional<Lock> lock = DDserver::m_getLock(lockName, LIFETIME);
+        std::cout << "got there!\n";
         return lock;
     }
 

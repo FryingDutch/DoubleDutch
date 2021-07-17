@@ -62,7 +62,7 @@ DoubleDutch needs a _.crt_ file named "certificate.crt" and a _.key_ file named 
 You will have to place these files in the _SSL directory_.  
 The program also uses authentication trough API Key verification. To set the API key, you edit the _config.txt_ file.  
   
-DoubleDutch runs inside a Docker container. To build using the provided _.Dockerfile_:
+DoubleDutch runs inside a Docker container. To build using the provided _Dockerfile_:
 ```bash
 docker build . -t server
 ```
@@ -75,7 +75,7 @@ docker run -p 8000:8000 server 8000
 **Besides the default settings, DoubleDutch offers optional customisation.**
 
 - **Name:** Give the server your own name.  
- This is especially usefull when you want to use multiple servers for different applications.  
+ This is especially useful when you want to use multiple servers for different applications.  
  By default this is "DoubleDutch/v0.1".
 ```bash
 n myServerName
