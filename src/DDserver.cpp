@@ -7,8 +7,7 @@
 #include <vector>
 #include <thread>
 #include "DDserver.h"
-#include <boost/optional.hpp>
-#include <boost/none.hpp>
+
 
 namespace DoubleD
 {
@@ -361,8 +360,6 @@ namespace DoubleD
     // returns a Lock if a Lock can be acquired, otherwise returns boost::none.
     boost::optional<Lock> DDserver::m_getLock(std::string lockName, const double LIFETIME){
         
-        boost::optional<Lock> lock = boost::none;
-
         bool free {true}; // whether the lock with <lockName> is available
         DDserver::m_storageMutex.lock();
         for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
@@ -375,19 +372,20 @@ namespace DoubleD
             }
         
         // if the lock is available, create and store the lock
+        boost::optional<Lock> lock = Lock("", 30.0f);
         if (free){
             lock = Lock(lockName, LIFETIME);
             DDserver::m_lockVector.push_back(lock.get());
         }
         DDserver::m_storageMutex.unlock();
-        return lock;
+        return boost::make_optional(free, lock);
     }
 
     // calls m_getLock until a lock has been acquired. Returns boost::none if timed-out. 
     boost::optional<Lock> DDserver::m_handleRequest(std::string lockName, const unsigned int TIMEOUT, const double LIFETIME)
     {
         auto startTime = std::chrono::high_resolution_clock::now();
-    
+
         boost::optional<Lock> lock = DDserver::m_getLock(lockName, LIFETIME);
         while (!lock && (std::chrono::high_resolution_clock::now() - startTime).count() < TIMEOUT)
         {  
