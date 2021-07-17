@@ -373,14 +373,14 @@ namespace DoubleD
                 }
             }
         
-        // create a lock, store and return it if applicable
+        // insert a Lock if applicable
         boost::optional<Lock> lock; 
         if (free) {
             lock = Lock(lockName, LIFETIME);
             DDserver::m_lockVector.push_back(lock.get());
         }
         DDserver::m_storageMutex.unlock();
-        return boost::make_optional(free, lock);
+        return lock;
 
     }
 
@@ -391,14 +391,14 @@ namespace DoubleD
         int tries = 0;
         do {  
             boost::optional<Lock> lock = DDserver::m_getLock(lockName, LIFETIME);
-            std::cout << "got here!\n";
             if(lock) return lock;
             tries ++;
             std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::m_precision));
         } while (tries < 10);  // difference < count
         boost::optional<Lock> lock = DDserver::m_getLock(lockName, LIFETIME);
         std::cout << "got there!\n";
-        return lock;
+        return lock_a; // this errs. Why?
+        // An uncaught exception occurred: basic_string::_M_construct null not valid
     }
 
 
