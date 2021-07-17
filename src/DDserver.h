@@ -21,12 +21,13 @@ namespace DoubleD
 		//functions used to define the settings of the server
 		static void m_errormsg(const char* message);
 		static bool m_isDigit(std::string str);
-		static void m_handlePrefixes(char* _argv[], int _argc);
+		static void m_handleCommandLineArguments(char* _argv[], int _argc);
 		static void m_loadApiKey();
 
 		//functions that are being used to define runtime situations
 		static void m_startup();
-		static std::string m_handleRequest(const unsigned int TIMEOUT, std::string lockName, const double LIFETIME);
+		static boost::optional<Lock> m_handleRequest(std::string lockName, const unsigned int TIMEOUT, const double LIFETIME);
+		static boost::optional<Lock> m_getLock(std::string lockName, const double LIFETIME);
 
 		//dedicated thread
 		static void m_checkLifetimes();
