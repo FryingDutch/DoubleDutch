@@ -267,7 +267,7 @@ namespace DoubleD
                     }
                     
                     boost::optional<Lock> lock = DDserver::m_handleRequest(lockName, timeout, lifetime);
-                    x["sessiontoken"] = lock ? lock.get().m_getSessionToken() : nullptr;
+                    x["sessiontoken"] = lock ? lock.get().m_getSessionToken() : "";
                     x["lockacquired"] = lock ? true : false;
                     x["lockname"] = lockName;
                     return crow::response(200, x);
@@ -314,7 +314,7 @@ namespace DoubleD
         std::thread th1(&DDserver::m_checkLifetimes);
 
         // configure the app instance with given parameters
-        app.port(DDserver::m_port).server_name(DDserver::m_server_name).concurrency(DDserver::m_threads).run();
+        app.port(DDserver::m_port).server_name(DDserver::m_server_name).concurrency(DDserver::m_threads);
         if (DDserver::m_is_https == true)
         {
             app.ssl_file(DDserver::m_crt_file_path, DDserver::m_key_file_path);
@@ -330,9 +330,10 @@ namespace DoubleD
             DDserver::m_errormsg(".key / .crt file not found");
         }
 
-        catch (...)
-        {
-            DDserver::m_errormsg("Unknown Error has occured");
+        catch (const std::exception& ex)
+        {   
+            DDserver::m_errormsg("An error has occurred. ");
+            std::cerr << ex.what() << std::endl;
         }
         
 
@@ -362,7 +363,8 @@ namespace DoubleD
     // returns a Lock if a Lock can be acquired, otherwise returns boost::none.
     boost::optional<Lock> DDserver::m_getLock(std::string lockName, const double LIFETIME){
         
-        bool free {true}; // whether the lock with <lockName> is free/available
+        // determine whether the lock with <lockName> is free/available
+        bool free {true}; 
         DDserver::m_storageMutex.lock();
         for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
             {
@@ -373,7 +375,7 @@ namespace DoubleD
                 }
             }
         
-        // insert a Lock if applicable
+        // insert a Lock if <lockName> is free/available
         boost::optional<Lock> lock; 
         if (free) {
             lock = Lock(lockName, LIFETIME);
@@ -388,17 +390,17 @@ namespace DoubleD
     boost::optional<Lock> DDserver::m_handleRequest(std::string lockName, const unsigned int TIMEOUT, const double LIFETIME)
     {
         auto startTime = std::chrono::high_resolution_clock::now();
-        int tries = 0;
-        do {  
+        std::chrono::duration<double> difference;
+        while (true)
+        {   
             boost::optional<Lock> lock = DDserver::m_getLock(lockName, LIFETIME);
-            if(lock) return lock;
-            tries ++;
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            difference = currentTime - startTime;
+            if(lock || difference.count() > TIMEOUT){
+                return lock;
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::m_precision));
-        } while (tries < 10);  // difference < count
-        boost::optional<Lock> lock = DDserver::m_getLock(lockName, LIFETIME);
-        std::cout << "got there!\n";
-        return lock_a; // this errs. Why?
-        // An uncaught exception occurred: basic_string::_M_construct null not valid
+        } 
     }
 
 
