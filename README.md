@@ -36,7 +36,7 @@ The result would be:
 ```json
 {
     "servername"   : "DoubleDutch/v0.1",
-    "lockname"     : "<lockname",
+    "lockname"     : "<lockname>",
     "lockreleased" : true
 }
 ```
