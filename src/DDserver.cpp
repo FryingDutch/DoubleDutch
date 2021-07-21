@@ -391,7 +391,7 @@ namespace DoubleD
     {
         auto startTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> difference;
-        while (true)
+        for(;;)
         {   
             boost::optional<Lock> lock = DDserver::m_getLock(lockName, LIFETIME);
             auto currentTime = std::chrono::high_resolution_clock::now();
