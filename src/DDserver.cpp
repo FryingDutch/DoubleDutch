@@ -29,10 +29,9 @@ namespace DoubleD
     std::vector<Lock> DDserver::m_lockVector;
     boost::mutex DDserver::m_storageMutex;
 
-
     DDserver::DDserver()
     {}
-
+    
     //setting functions
     void DDserver::m_errormsg(const char* message)
     {
@@ -160,14 +159,12 @@ namespace DoubleD
 
     void DDserver::m_setAndBoot(int _argc, char* _argv[])
     {
-
         DDserver::m_handleCommandLineArguments(_argv, _argc);
         if(DDserver::m_custom_api_key == false) DDserver::m_loadApiKey();
 
-
         if (DDserver::m_port > 0 && DDserver::m_threads > 0 && DDserver::m_precision > 0)
         {
-            if (DDserver::m_error == false)
+            if (!DDserver::m_error)
             {
                 DDserver::m_startup();
             }
@@ -315,7 +312,7 @@ namespace DoubleD
 
         // configure the app instance with given parameters
         app.port(DDserver::m_port).server_name(DDserver::m_server_name).concurrency(DDserver::m_threads);
-        if (DDserver::m_is_https == true)
+        if (DDserver::m_is_https)
         {
             app.ssl_file(DDserver::m_crt_file_path, DDserver::m_key_file_path);
         }
@@ -336,11 +333,9 @@ namespace DoubleD
             std::cerr << ex.what() << std::endl;
         }
         
-
         DDserver::m_isRunning = false;
         th1.join();
     }
-
 
     void DDserver::m_checkLifetimes()
     {
@@ -383,7 +378,6 @@ namespace DoubleD
         }
         DDserver::m_storageMutex.unlock();
         return lock;
-
     }
 
     // calls m_getLock until a lock has been acquired. Returns boost::none if timed-out. 
@@ -402,6 +396,4 @@ namespace DoubleD
             std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::m_precision));
         } 
     }
-
-
 }
