@@ -12,34 +12,34 @@
 
 namespace DoubleD
 {
-    std::string DDserver::m_server_name = "DoubleDutch/v0.1";
-    std::string DDserver::m_crt_file_path = "../SSL/certificate.crt";
-    std::string DDserver::m_key_file_path = "../SSL/privateKey.key";
-    std::string DDserver::m_api_key;
+    std::string DDserver::server_name = "DoubleDutch/v0.1";
+    std::string DDserver::crt_file_path = "../SSL/certificate.crt";
+    std::string DDserver::key_file_path = "../SSL/privateKey.key";
+    std::string DDserver::api_key;
 
-    int DDserver::m_port = 1;
-    int DDserver::m_precision = 333;
-    int DDserver::m_threads = std::thread::hardware_concurrency();
+    int DDserver::port = 1;
+    int DDserver::precision = 333;
+    int DDserver::threads = std::thread::hardware_concurrency();
 
-    bool DDserver::m_is_https = true;
-    bool DDserver::m_error = false;
-    bool DDserver::m_isRunning = true;
-    bool DDserver::m_custom_api_key = false;
+    bool DDserver::is_https = true;
+    bool DDserver::error = false;
+    bool DDserver::isRunning = true;
+    bool DDserver::custom_api_key = false;
 
-    std::vector<Lock> DDserver::m_lockVector;
-    boost::mutex DDserver::m_storageMutex;
+    std::vector<Lock> DDserver::lockVector;
+    boost::mutex DDserver::storageMutex;
 
     DDserver::DDserver()
     {}
-    
+
     //setting functions
-    void DDserver::m_errormsg(const char* message)
+    void DDserver::errormsg(const char* message)
     {
-        DDserver::m_error = true;
+        DDserver::error = true;
         std::cerr << "[ERROR]: " << message << "! Terminating...\n";
     }
 
-    bool DDserver::m_isDigit(std::string str)
+    bool DDserver::isDigit(std::string str)
     {
         for (long unsigned int i = 0; i < str.length(); i++)
         {
@@ -51,45 +51,45 @@ namespace DoubleD
         return true;
     }
 
-    void DDserver::m_handleCommandLineArguments(char* _argv[], int _argc)
+    void DDserver::handleCommandLineArguments(char* _argv[], int _argc)
     {
         //if the argument count is higher then one (Need at least portnumber)
         //and the argument count is even (every prefix needs a value)
         //and the portnumber is an actual digit
-        if (_argc > 1 && _argc % 2 == 0 && DDserver::m_isDigit(_argv[1]))
+        if (_argc > 1 && _argc % 2 == 0 && DDserver::isDigit(_argv[1]))
         {
             //set the port number
-            DDserver::m_port = std::stoi(_argv[1]);
+            DDserver::port = std::stoi(_argv[1]);
 
             //for every flag check and assign the user input to the correct variable
             for (int i = 2; i < _argc; i += 2)
             {
                 //if the value next to the flag is a digit
-                if (DDserver::m_isDigit(_argv[i + 1]))
+                if (DDserver::isDigit(_argv[i + 1]))
                 {
                     switch (*_argv[i])
                     {
                     case 'p':
-                        DDserver::m_precision = std::stoi(_argv[i + 1]);
+                        DDserver::precision = std::stoi(_argv[i+1]);
                         break;
 
                     case 't':
-                        DDserver::m_threads = std::stoi(_argv[i + 1]);
+                        DDserver::threads = std::stoi(_argv[i+1]);
                         break;
 
                     case 'h':
-                        if (std::stoi(_argv[i + 1]) == 0)
+                        if (std::stoi(_argv[i+1]) == 0)
                         {
-                            DDserver::m_is_https = false;
+                            DDserver::is_https = false;
                         }
                         else
                         {
-                            DDserver::m_errormsg("h only takes 0 as an argument");
+                            DDserver::errormsg("h only takes 0 as an argument");
                         }
                         break;
 
                     default:
-                        DDserver::m_errormsg("Not a valid command-line flag");
+                        DDserver::errormsg("Not a valid command-line flag");
                         break;
                     }
                 }
@@ -99,24 +99,24 @@ namespace DoubleD
                     switch (*_argv[i])
                     {
                     case 'n':
-                        DDserver::m_server_name = _argv[i + 1];
+                        DDserver::server_name = _argv[i + 1];
                         break;
 
                     case 'c':
-                        DDserver::m_crt_file_path = DDserver::m_crt_file_path.substr(0, 7) + _argv[i + 1];
+                        DDserver::crt_file_path = DDserver::crt_file_path.substr(0, 7) + _argv[i + 1];
                         break;
 
                     case 'k':
-                        DDserver::m_key_file_path = DDserver::m_key_file_path.substr(0, 7) + _argv[i + 1];
+                        DDserver::key_file_path = DDserver::key_file_path.substr(0, 7) + _argv[i + 1];
                         break;
 
                     case 'a':
-                        DDserver::m_api_key = _argv[i + 1];
-                        DDserver::m_custom_api_key = true;
+                        DDserver::api_key = _argv[i + 1];
+                        DDserver::custom_api_key = true;
                         break;
 
                     default:
-                        DDserver::m_errormsg("Not a valid flag");
+                        DDserver::errormsg("Not a valid flag");
                         break;
                     }
                 }
@@ -125,12 +125,12 @@ namespace DoubleD
 
         else
         {
-            DDserver::m_errormsg("Not a valid input");
+            DDserver::errormsg("Not a valid input");
         }
     }
 
-    // reads the API key from a file, and assigns its string value to DDserver::m_api_key
-    void DDserver::m_loadApiKey()
+    // reads the API key from a file, and assigns its string value to DDserver::api_key
+    void DDserver::loadApiKey()
     {
         std::ifstream file("../config.txt", std::ios::in);
         if (file.is_open())
@@ -141,43 +141,43 @@ namespace DoubleD
 
             if (_str != "")
             {
-                DDserver::m_api_key = _str;
+                DDserver::api_key = _str;
             }
 
             else
             {
-                DDserver::m_errormsg("Empty key file");
+                DDserver::errormsg("Empty key file");
             }
         }
 
         else
         {
-            DDserver::m_errormsg("No API-key file found");
+            DDserver::errormsg("No API-key file found");
         }
     }
 
 
-    void DDserver::m_setAndBoot(int _argc, char* _argv[])
+    void DDserver::setAndBoot(int _argc, char* _argv[])
     {
-        DDserver::m_handleCommandLineArguments(_argv, _argc);
-        if(DDserver::m_custom_api_key == false) DDserver::m_loadApiKey();
+        DDserver::handleCommandLineArguments(_argv, _argc);
+        if(!DDserver::custom_api_key) DDserver::loadApiKey();
 
-        if (DDserver::m_port > 0 && DDserver::m_threads > 0 && DDserver::m_precision > 0)
+        if (DDserver::port > 0 && DDserver::threads > 0 && DDserver::precision > 0)
         {
-            if (!DDserver::m_error)
+            if (!DDserver::error)
             {
-                DDserver::m_startup();
+                DDserver::startup();
             }
         }
 
         else
         {
-            DDserver::m_errormsg("Need [SIGNED INT] as argument");
+            DDserver::errormsg("Need [SIGNED INT] as argument");
         }
     }
 
     //runtime functions
-    void DDserver::m_startup()
+    void DDserver::startup()
     {
         crow::SimpleApp app;
 
@@ -185,14 +185,14 @@ namespace DoubleD
             ([&](const crow::request& req) {
             
             crow::json::wvalue x;
-            x["servername"] = DDserver::m_server_name;
+            x["servername"] = DDserver::server_name;
 
             if (req.url_params.get("auth") == nullptr)
             {
                 x["status"] = "no api key";
                 return crow::response(400, x);
             }
-            else if (DDserver::m_api_key != req.url_params.get("auth"))
+            else if (DDserver::api_key != req.url_params.get("auth"))
             {
                 x["status"] = "invalid key";
                 return crow::response(401, x);
@@ -206,13 +206,13 @@ namespace DoubleD
             std::vector<std::string> jsonList;
             x["locks"] = jsonList;
 
-            DDserver::m_storageMutex.lock();
-            for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
-                x["locks"][i]["lockname"] = DDserver::m_lockVector[i].m_getName();
-                x["locks"][i]["sessiontoken"] = DDserver::m_lockVector[i].m_getSessionToken();
-                x["locks"][i]["remaining"] = DDserver::m_lockVector[i].m_timeLeft();
+            DDserver::storageMutex.lock();
+            for (long unsigned int i = 0; i < DDserver::lockVector.size(); i++) {
+                x["locks"][i]["lockname"] = DDserver::lockVector[i].getName();
+                x["locks"][i]["sessiontoken"] = DDserver::lockVector[i].getSessionToken();
+                x["locks"][i]["remaining"] = DDserver::lockVector[i].timeLeft();
             }
-            DDserver::m_storageMutex.unlock();
+            DDserver::storageMutex.unlock();
             return crow::response(200, x);
         });
 
@@ -220,7 +220,7 @@ namespace DoubleD
             ([&](const crow::request& req)
                 {
                     crow::json::wvalue x;
-                    x["servername"] = DDserver::m_server_name;
+                    x["servername"] = DDserver::server_name;
 
                     // lockName
                     std::string lockName;
@@ -237,7 +237,7 @@ namespace DoubleD
                         x["error"] = "no api key supplied";
                         return crow::response(401, x);
                     }
-                    if (DDserver::m_api_key != req.url_params.get("auth"))
+                    if (DDserver::api_key != req.url_params.get("auth"))
                     {
                         x["error"] = "invalid api key";
                         return crow::response(401, x);
@@ -263,8 +263,8 @@ namespace DoubleD
                         timeout = 0.0f;
                     }
                     
-                    boost::optional<Lock> lock = DDserver::m_handleRequest(lockName, timeout, lifetime);
-                    x["sessiontoken"] = lock ? lock.get().m_getSessionToken() : "";
+                    boost::optional<Lock> lock = DDserver::handleRequest(lockName, timeout, lifetime);
+                    x["sessiontoken"] = lock ? lock.get().getSessionToken() : "";
                     x["lockacquired"] = lock ? true : false;
                     x["lockname"] = lockName;
                     return crow::response(200, x);
@@ -275,7 +275,7 @@ namespace DoubleD
             ([&](const crow::request& req) {
             std::string lockName, session_token;
             crow::json::wvalue x;
-            x["servername"] = DDserver::m_server_name;
+            x["servername"] = DDserver::server_name;
 
             if (req.url_params.get("lockname") == nullptr || req.url_params.get("token") == nullptr)
             {
@@ -290,31 +290,31 @@ namespace DoubleD
             }
 
             bool released {false};
-            DDserver::m_storageMutex.lock();
-            for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++) {
+            DDserver::storageMutex.lock();
+            for (long unsigned int i = 0; i < DDserver::lockVector.size(); i++) {
 
-                if (lockName == DDserver::m_lockVector[i].m_getName() && 
-                session_token == DDserver::m_lockVector[i].m_getSessionToken()) 
+                if (lockName == DDserver::lockVector[i].getName() && 
+                session_token == DDserver::lockVector[i].getSessionToken()) 
                 { 
-                    DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
-                    DDserver::m_lockVector.shrink_to_fit();
+                    DDserver::lockVector.erase(DDserver::lockVector.begin() + i);
+                    DDserver::lockVector.shrink_to_fit();
                     released = true;
                     break;
                 }
             }
-            DDserver::m_storageMutex.unlock();
+            DDserver::storageMutex.unlock();
             x["lockreleased"] = released;
             x["lockname"] = lockName;
             return crow::response(released ? 200 : 400, x);
         });
 
-        std::thread th1(&DDserver::m_checkLifetimes);
+        std::thread th1(&DDserver::checkLifetimes);
 
         // configure the app instance with given parameters
-        app.port(DDserver::m_port).server_name(DDserver::m_server_name).concurrency(DDserver::m_threads);
-        if (DDserver::m_is_https)
+        app.port(DDserver::port).server_name(DDserver::server_name).concurrency(DDserver::threads);
+        if (DDserver::is_https)
         {
-            app.ssl_file(DDserver::m_crt_file_path, DDserver::m_key_file_path);
+            app.ssl_file(DDserver::crt_file_path, DDserver::key_file_path);
         }
 
         try 
@@ -324,76 +324,76 @@ namespace DoubleD
 
         catch (boost::wrapexcept<boost::system::system_error>& error)
         {
-            DDserver::m_errormsg(".key / .crt file not found");
+            DDserver::errormsg(".key / .crt file not found");
         }
 
         catch (const std::exception& ex)
         {   
-            DDserver::m_errormsg("An error has occurred. ");
+            DDserver::errormsg("An error has occurred. ");
             std::cerr << ex.what() << std::endl;
         }
-        
-        DDserver::m_isRunning = false;
+
+        DDserver::isRunning = false;
         th1.join();
     }
 
-    void DDserver::m_checkLifetimes()
+    void DDserver::checkLifetimes()
     {
-        while (DDserver::m_isRunning)
+        while (DDserver::isRunning)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::m_precision));
-            DDserver::m_storageMutex.lock();
-            for (unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
+            std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::precision));
+            DDserver::storageMutex.lock();
+            for (unsigned int i = 0; i < DDserver::lockVector.size(); i++)
             {
-                if (DDserver::m_lockVector[i].m_expired())
+                if (DDserver::lockVector[i].expired())
                 {
-                    DDserver::m_lockVector.erase(DDserver::m_lockVector.begin() + i);
-                    DDserver::m_lockVector.shrink_to_fit();
+                    DDserver::lockVector.erase(DDserver::lockVector.begin() + i);
+                    DDserver::lockVector.shrink_to_fit();
                 }
             }
-            DDserver::m_storageMutex.unlock();
+            DDserver::storageMutex.unlock();
         }
     }
 
     // returns a Lock if a Lock can be acquired, otherwise returns boost::none.
-    boost::optional<Lock> DDserver::m_getLock(std::string lockName, const double LIFETIME){
+    boost::optional<Lock> DDserver::getLock(std::string lockName, const double LIFETIME){
         
         // determine whether the lock with <lockName> is free/available
         bool free {true}; 
-        DDserver::m_storageMutex.lock();
-        for (long unsigned int i = 0; i < DDserver::m_lockVector.size(); i++)
-            {
-                if (lockName == DDserver::m_lockVector[i].m_getName() && !DDserver::m_lockVector[i].m_expired())
-                {   
-                    free = false;
-                    break;
-                }
+        DDserver::storageMutex.lock();
+        for (long unsigned int i = 0; i < DDserver::lockVector.size(); i++)
+        {
+            if (lockName == DDserver::lockVector[i].getName() && !DDserver::lockVector[i].expired())
+            {   
+                free = false;
+                break;
             }
+        }
         
         // insert a Lock if <lockName> is free/available
         boost::optional<Lock> lock; 
         if (free) {
             lock = Lock(lockName, LIFETIME);
-            DDserver::m_lockVector.push_back(lock.get());
+            DDserver::lockVector.push_back(lock.get());
         }
-        DDserver::m_storageMutex.unlock();
+        DDserver::storageMutex.unlock();
         return lock;
     }
 
-    // calls m_getLock until a lock has been acquired. Returns boost::none if timed-out. 
-    boost::optional<Lock> DDserver::m_handleRequest(std::string lockName, const unsigned int TIMEOUT, const double LIFETIME)
+    // calls getLock until a lock has been acquired. Returns boost::none if timed-out. 
+    boost::optional<Lock> DDserver::handleRequest(std::string lockName, const unsigned int TIMEOUT, const double LIFETIME)
     {
         auto startTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> difference;
         for(;;)
         {   
-            boost::optional<Lock> lock = DDserver::m_getLock(lockName, LIFETIME);
+            boost::optional<Lock> lock = DDserver::getLock(lockName, LIFETIME);
             auto currentTime = std::chrono::high_resolution_clock::now();
             difference = currentTime - startTime;
             if(lock || difference.count() > TIMEOUT){
                 return lock;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::m_precision));
+            std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::precision));
         } 
     }
 }
