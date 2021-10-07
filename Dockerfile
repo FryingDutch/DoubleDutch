@@ -1,14 +1,16 @@
 # base image
-FROM ubuntu:latest
+FROM ubuntu:latest AS stageOne
 
 # install cmake, gcc, g++, boost, and git
 RUN apt-get update
-RUN apt-get install -yq cmake gcc g++ 
+RUN apt-get install -yq cmake gcc g++
+RUN apt-get install -yq libcurl4-openssl-dev
 RUN apt-get install -yq libboost-all-dev
+RUN apt-get install -yq libssl-dev
 RUN apt-get install -yq git
 
 # get crow's include/ dir
-RUN git clone --branch 0.2 https://github.com/CrowCpp/crow
+RUN git clone --branch v0.3 https://github.com/CrowCpp/crow
 RUN cp -r crow/include include
 
 # make a directory we'll use to build
@@ -18,13 +20,9 @@ RUN mkdir build
 COPY ./ /
 
 # build the app
-WORKDIR build
+WORKDIR /build
 RUN cmake ..
-RUN make 
+RUN make  
 
 # run the app!
 ENTRYPOINT ["src/server"]
-
-
-
-

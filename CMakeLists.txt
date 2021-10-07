@@ -1,7 +1,7 @@
 # from: https://github.com/jolks/crow-template/tree/master/src
 
 cmake_minimum_required(VERSION 3.0)
-project (server )
+project (server)
 
 if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -40,6 +40,7 @@ else()
 	find_package( Boost 1.71 COMPONENTS system thread REQUIRED )
 endif()
 
+include_directories( ${OPENSSL_INCLUDE_DIR} )
 include_directories( ${Boost_INCLUDE_DIR} )
 
 set(PROJECT_INCLUDE_DIR
