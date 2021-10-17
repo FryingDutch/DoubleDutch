@@ -7,6 +7,7 @@
 #include <vector>
 #include <thread>
 #include <boost/optional.hpp>
+#include <jsoncpp/json/json.h>
 #include "DDserver.h"
 #include "Request.h"
 
@@ -26,6 +27,7 @@ namespace DoubleD
     bool DDserver::isRunning = true;
     bool DDserver::custom_api_key = false;
 
+    std::vector<const char*> DDserver::backup_addresses;
     std::vector<Lock> DDserver::lockVector;
     boost::mutex DDserver::storageMutex;
 
@@ -38,7 +40,7 @@ namespace DoubleD
 
     bool DDserver::isDigit(std::string str)
     {
-        for (long unsigned int i = 0; i < str.length(); i++)
+        for (size_t i = 0; i < str.length(); i++)
         {
             if (!std::isdigit(str[i]))
             {
@@ -46,6 +48,19 @@ namespace DoubleD
             }
         }
         return true;
+    }
+
+    const char* DDserver::createStatusPayload()
+    {
+        std::string payload{ "?" };
+        for (size_t i = 0; i < DDserver::lockVector.size(); i++)
+        {
+            DDserver::lockVector[i].m_getName();
+            DDserver::lockVector[i].m_getSessionToken();
+            DDserver::lockVector[i].m_timeLeft();
+        }
+
+        return payload.c_str();
     }
 
     void DDserver::handleCommandLineArguments(char* _argv[], int _argc)
@@ -198,7 +213,7 @@ namespace DoubleD
             x["locks"] = jsonList;
 
             DDserver::storageMutex.lock();
-            for (long unsigned int i = 0; i < DDserver::lockVector.size(); i++) {
+            for (size_t i = 0; i < DDserver::lockVector.size(); i++) {
                 x["locks"][i]["lockname"] = DDserver::lockVector[i].m_getName();
                 x["locks"][i]["sessiontoken"] = DDserver::lockVector[i].m_getSessionToken();
                 x["locks"][i]["remaining"] = DDserver::lockVector[i].m_timeLeft();
@@ -246,10 +261,9 @@ namespace DoubleD
             else
                 _timeout = 0.0f;
 
-            Request request;
-            std::string URL = "http://localhost:8000/status?auth=" + api_key;
-            request.get(URL.c_str());
-            std::cout << request.data << std::endl;
+            DDserver::backup_addresses.push_back("http://localhost:8000/status");
+            std::string payLoad{ "auth=" };
+            payLoad += req.url_params.get("auth");
 
             boost::optional<Lock> _lock = DDserver::handleRequest(_lockName, _timeout, _lifetime);
             x["sessiontoken"] = _lock ? _lock.get().m_getSessionToken() : "";
