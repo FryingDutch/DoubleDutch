@@ -7,9 +7,7 @@
 #include <vector>
 #include <thread>
 #include <boost/optional.hpp>
-#include <jsoncpp/json/json.h>
 #include "DDserver.h"
-#include "Request.h"
 
 namespace DoubleD
 {
@@ -27,7 +25,6 @@ namespace DoubleD
     bool DDserver::isRunning = true;
     bool DDserver::custom_api_key = false;
 
-    std::vector<const char*> DDserver::backup_addresses;
     std::vector<Lock> DDserver::lockVector;
     boost::mutex DDserver::storageMutex;
 
@@ -40,7 +37,7 @@ namespace DoubleD
 
     bool DDserver::isDigit(std::string str)
     {
-        for (size_t i = 0; i < str.length(); i++)
+        for (long unsigned int i = 0; i < str.length(); i++)
         {
             if (!std::isdigit(str[i]))
             {
@@ -48,19 +45,6 @@ namespace DoubleD
             }
         }
         return true;
-    }
-
-    const char* DDserver::createStatusPayload()
-    {
-        std::string payload{ "?" };
-        for (size_t i = 0; i < DDserver::lockVector.size(); i++)
-        {
-            DDserver::lockVector[i].m_getName();
-            DDserver::lockVector[i].m_getSessionToken();
-            DDserver::lockVector[i].m_timeLeft();
-        }
-
-        return payload.c_str();
     }
 
     void DDserver::handleCommandLineArguments(char* _argv[], int _argc)
@@ -87,15 +71,15 @@ namespace DoubleD
                     switch (*_argv[flag])
                     {
                     case PRECISION:
-                        DDserver::precision = std::stoi(_argv[flag + 1]);
+                        DDserver::precision = std::stoi(_argv[flag+1]);
                         break;
 
                     case THREADS:
-                        DDserver::threads = std::stoi(_argv[flag + 1]);
+                        DDserver::threads = std::stoi(_argv[flag+1]);
                         break;
 
                     case HTTPS:
-                        if (std::stoi(_argv[flag + 1]) == false)
+                        if (std::stoi(_argv[flag+1]) == false)
                         {
                             DDserver::is_https = false;
                         }
@@ -116,19 +100,19 @@ namespace DoubleD
                     switch (*_argv[flag])
                     {
                     case NAME:
-                        DDserver::server_name = _argv[flag + 1];
+                        DDserver::server_name = _argv[flag+1];
                         break;
 
                     case CRTFILE:
-                        DDserver::crt_file_path = DDserver::crt_file_path.substr(0, 7) + _argv[flag + 1];
+                        DDserver::crt_file_path = DDserver::crt_file_path.substr(0, 7) + _argv[flag+1];
                         break;
 
                     case KEYFILE:
-                        DDserver::key_file_path = DDserver::key_file_path.substr(0, 7) + _argv[flag + 1];
+                        DDserver::key_file_path = DDserver::key_file_path.substr(0, 7) + _argv[flag+1];
                         break;
 
                     case APIKEY:
-                        DDserver::api_key = _argv[flag + 1];
+                        DDserver::api_key = _argv[flag+1];
                         DDserver::custom_api_key = true;
                         break;
 
@@ -156,11 +140,9 @@ namespace DoubleD
             std::getline(_keyFile, _apiKey);
             _keyFile.close();
 
-            if (_apiKey != "") 
-                DDserver::api_key = _apiKey;
+            if (_apiKey != "") DDserver::api_key = _apiKey;
 
-            else 
-                DDserver::errormsg("Empty key file");
+            else DDserver::errormsg("Empty key file");
         }
 
         else DDserver::errormsg("No API-key file found");
@@ -169,17 +151,17 @@ namespace DoubleD
     void DDserver::setAndBoot(int _argc, char* _argv[])
     {
         DDserver::handleCommandLineArguments(_argv, _argc);
-        if (!DDserver::custom_api_key) 
-            DDserver::loadApiKey();
+        if (!DDserver::custom_api_key) DDserver::loadApiKey();
 
         if (DDserver::port > 0 && DDserver::threads > 0 && DDserver::precision > -1)
         {
-            if (!DDserver::error) 
-                DDserver::startup();
+            if (!DDserver::error) DDserver::startup();
         }
 
         else
+        {
             DDserver::errormsg("Need [SIGNED INT] as argument");
+        }
     }
 
     //runtime functions
@@ -213,7 +195,7 @@ namespace DoubleD
             x["locks"] = jsonList;
 
             DDserver::storageMutex.lock();
-            for (size_t i = 0; i < DDserver::lockVector.size(); i++) {
+            for (long unsigned int i = 0; i < DDserver::lockVector.size(); i++) {
                 x["locks"][i]["lockname"] = DDserver::lockVector[i].m_getName();
                 x["locks"][i]["sessiontoken"] = DDserver::lockVector[i].m_getSessionToken();
                 x["locks"][i]["remaining"] = DDserver::lockVector[i].m_timeLeft();
@@ -252,18 +234,22 @@ namespace DoubleD
             // lifetime and timeout
             double _lifetime, _timeout;
             if (req.url_params.get("lifetime") != nullptr)
+            {
                 _lifetime = boost::lexical_cast<double>(req.url_params.get("lifetime"));
+            }
             else
+            {
                 _lifetime = 30.0f;
+            }
 
             if (req.url_params.get("timeout") != nullptr)
+            {
                 _timeout = boost::lexical_cast<double>(req.url_params.get("timeout"));
+            }
             else
+            {
                 _timeout = 0.0f;
-
-            DDserver::backup_addresses.push_back("http://localhost:8000/status");
-            std::string payLoad{ "auth=" };
-            payLoad += req.url_params.get("auth");
+            }
 
             boost::optional<Lock> _lock = DDserver::handleRequest(_lockName, _timeout, _lifetime);
             x["sessiontoken"] = _lock ? _lock.get().m_getSessionToken() : "";
@@ -309,7 +295,7 @@ namespace DoubleD
             x["lockname"] = _lockName;
             return crow::response(_released ? 200 : 400, x);
         });
-        std::thread _lifeTime_thread(&DDserver::checkLifetimes);
+        std::thread _lifeTime_thread(&DDserver::checkLifetimes);        
 
         // configure the app instance with given parameters
         app.port(DDserver::port).server_name(DDserver::server_name).concurrency(DDserver::threads);
