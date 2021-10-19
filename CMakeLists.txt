@@ -12,7 +12,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 find_package(Tcmalloc)
 find_package(Threads)
-find_package(OpenSSL)
+
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+find_package(OpenSSL REQUIRED)
 
 if(OPENSSL_FOUND)
 	include_directories(${OPENSSL_INCLUDE_DIR})
@@ -35,9 +37,11 @@ endif()
 if (MSVC)
 	set(Boost_USE_STATIC_LIBS "On")
 	find_package( Boost 1.71 COMPONENTS system thread regex REQUIRED )
+	
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++1y -pedantic -Wextra")
 	find_package( Boost 1.71 COMPONENTS system thread REQUIRED )
+	
 endif()
 
 include_directories( ${OPENSSL_INCLUDE_DIR} )
