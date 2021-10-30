@@ -25,7 +25,7 @@ When the lock on `<lockname>` was acquired, the server will return the following
     "lockacquired" :  true 
 }
 ```
-If a lock could not be acquired, `"lockAcquired"` and `"sessionToken"` will be set to `false` and `""`, respectively. 
+If a lock could not be acquired, `"lockacquired"` and `"sessiontoken"` will be set to `false` and `""`, respectively. 
 
 The client has to use the `<sessionToken>` (a random string of 32 chararcters) to release the lock.
 When using a Python Client, a request to release the lock may look like this:
