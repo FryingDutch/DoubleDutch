@@ -130,7 +130,7 @@ Distributed locks are used for roughly [two reasons](https://martin.kleppmann.co
 - **Efficiency**: Taking a lock saves you from unnecessarily doing the same work twice (e.g. some expensive computation).
 - **Correctness**: Taking a lock prevents concurrent processes from stepping on each others’ toes and messing up the state of your system.  
 
-When your locks fall in the latter category, it is _currently_ difficult to deploy DoubleDutch in a fault-tolerant way. If, on the other hand, it does not matter that clients _accidentally_ acquire the same lock, you can use Double Dutch with your favourite container orchestrator (e.g. Docker Swarm](https://docs.docker.com/engine/swarm/)). In that case, you can have the orchestrator take care of spinning up another (single) DoubleDutch instance when one of the nodes in your cluster goes down.  
+When your locks fall in the latter category, it is _currently_ difficult to deploy DoubleDutch in a fault-tolerant way. If, on the other hand, it does not matter that clients _accidentally_ acquire the same lock, you can use Double Dutch with your favourite container orchestrator (e.g. [Docker Swarm](https://docs.docker.com/engine/swarm/)). In that case, you can have the orchestrator take care of spinning up another (single) DoubleDutch instance when one of the nodes in your cluster goes down.  
 
 ## Known issues and limitations
 - No implementation for a correctness focused backup server yet
