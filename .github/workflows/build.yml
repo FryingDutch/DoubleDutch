@@ -1,0 +1,18 @@
+on:
+  push:
+    branches:
+      - 'main'
+
+  # used to manually trigger build
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Description'  
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build the docker image
+      run: docker build .
