@@ -39,5 +39,14 @@ WORKDIR /DoubleDutch/build/
 FROM finalimage AS dev
 CMD [ "/bin/bash" ]
 
+# Run tests in a Python image based on ubuntu.
+FROM fnndsc/ubuntu-python3:ubuntu20.04-python3.8.10 as test
+COPY --from=finalimage /DoubleDutch /DoubleDutch
+WORKDIR /DoubleDutch/build
+RUN pip install requests pytest
+COPY tests/test_server.py test_server.py
+RUN pytest | tee /test_results.log 
+
 FROM finalimage AS production
+COPY --from=test /test_results.log /test_results.log
 ENTRYPOINT ["./server"]

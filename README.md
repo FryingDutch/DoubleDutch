@@ -1,5 +1,7 @@
 # DoubleDutch: a distributed advisory lock
 
+[![.github/workflows/build.yml](https://github.com/jessehl/LockManager/actions/workflows/build.yml/badge.svg)](https://github.com/jessehl/LockManager/actions/workflows/build.yml)
+
 **DoubleDutch** is a C++ program that coordinates distributed access to shared resources, such as databases or file systems. Clients make requests to DoubleDutch, asking for exclusive usage of a resource (or permission to perform a one-time task). Once the client is finished (or timed-out), the lock is released and ready to be acquired by another client. This project is inspired by MySQL's `GET_LOCK` [function](https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock). DoubleDutch is a http(s) server, based on [CrowCpp](https://github.com/CrowCpp/crow/tree/master). 
 
 
@@ -25,7 +27,7 @@ When the lock on `<lockname>` was acquired, the server will return the following
     "lockacquired" :  true 
 }
 ```
-If a lock could not be acquired, `"lockAcquired"` and `"sessionToken"` will be set to `false` and `""`, respectively. 
+If a lock could not be acquired, `"lockacquired"` and `"sessiontoken"` will be set to `false` and `""`, respectively. 
 
 The client has to use the `<sessionToken>` (a random string of 32 chararcters) to release the lock.
 When using a Python Client, a request to release the lock may look like this:
@@ -123,12 +125,12 @@ docker run -p 8000:8000 server 8000 t 12 a myRandomString c newcert.crt
 ```
 
 
-## Cluster mode
+## Replication and fault-tolerance
 Distributed locks are used for roughly [two reasons](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html):
 - **Efficiency**: Taking a lock saves you from unnecessarily doing the same work twice (e.g. some expensive computation).
 - **Correctness**: Taking a lock prevents concurrent processes from stepping on each others’ toes and messing up the state of your system.  
 
-When you're using DoubleDutch for the latter reason, you cannot use DoubleDutch in cluster mode. When employing DoubleDutch for efficiency reasons, though, you can easily spin up multiple instances (on different servers). In that case, you have to ensure that the clients are aware of all the hostnames. When one server is down, clients can try to acquire a lock at the 'next' DoubleDutch instances. 
+When your locks fall in the latter category, it is _currently_ difficult to deploy DoubleDutch in a fault-tolerant way. If, on the other hand, it does not matter that clients _accidentally_ acquire the same lock, you can use Double Dutch with your favourite container orchestrator (e.g. Docker Swarm](https://docs.docker.com/engine/swarm/)). In that case, you can have the orchestrator take care of spinning up another (single) DoubleDutch instance when one of the nodes in your cluster goes down.  
 
 ## Known issues and limitations
 - No implementation for a correctness focused backup server yet
