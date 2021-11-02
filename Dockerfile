@@ -45,7 +45,8 @@ COPY --from=finalimage /DoubleDutch /DoubleDutch
 WORKDIR /DoubleDutch/build
 RUN pip install requests pytest
 COPY tests/test_server.py test_server.py
-RUN pytest | tee /test_results.log 
+RUN pytest
+RUN echo "tests completed" >> /test_results.log
 
 FROM finalimage AS production
 COPY --from=test /test_results.log /test_results.log
