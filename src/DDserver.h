@@ -21,7 +21,7 @@ namespace DoubleD
 		//functions used to define the settings of the server
 		static void errormsg(const char* message);
 		static bool isDigit(std::string str);
-		static void handleCommandLineArguments(char* _argv[], int32_t _argc);
+		static void handleCommandLineArguments(char* _argv[], uint32_t _argc);
 		static void loadApiKey();
 
 		//functions that are being used to define runtime situations

@@ -16,14 +16,14 @@ namespace DoubleD
     std::string DDserver::key_file_path = "/privateKey.key";
     std::string DDserver::api_key;
 
-    int32_t DDserver::port{1};
-    int32_t DDserver::precision{333};
-    int32_t DDserver::threads{std::thread::hardware_concurrency()};
+    int32_t DDserver::port{ 1 };
+    int32_t DDserver::precision{ 333 };
+    int32_t DDserver::threads{ (int32_t)std::thread::hardware_concurrency() };
 
-    bool DDserver::is_https{true};
-    bool DDserver::error{false};
-    bool DDserver::isRunning {true};
-    bool DDserver::custom_api_key{false};
+    bool DDserver::is_https{ true };
+    bool DDserver::error{ false };
+    bool DDserver::isRunning{ true };
+    bool DDserver::custom_api_key{ false };
 
     std::vector<Lock> DDserver::lockVector;
     boost::mutex DDserver::storageMutex;
@@ -47,7 +47,7 @@ namespace DoubleD
         return true;
     }
 
-    void DDserver::handleCommandLineArguments(char* _argv[], int32_t _argc)
+    void DDserver::handleCommandLineArguments(char* _argv[], uint32_t _argc)
     {
         //if the argument count is higher then one (Need at least portnumber)
         //and the argument count is even (every prefix needs a value)
@@ -71,15 +71,15 @@ namespace DoubleD
                     switch (*_argv[flag])
                     {
                     case PRECISION:
-                        DDserver::precision = std::stoi(_argv[flag+1]);
+                        DDserver::precision = std::stoi(_argv[flag + 1]);
                         break;
 
                     case THREADS:
-                        DDserver::threads = std::stoi(_argv[flag+1]);
+                        DDserver::threads = std::stoi(_argv[flag + 1]);
                         break;
 
                     case HTTPS:
-                        if (std::stoi(_argv[flag+1]) == 0)
+                        if (std::stoi(_argv[flag + 1]) == 0)
                         {
                             DDserver::is_https = false;
                         }
@@ -100,19 +100,19 @@ namespace DoubleD
                     switch (*_argv[flag])
                     {
                     case NAME:
-                        DDserver::server_name = _argv[flag+1];
+                        DDserver::server_name = _argv[flag + 1];
                         break;
 
                     case CRTFILE:
-                        DDserver::crt_file_path = DDserver::crt_file_path.substr(0, 7) + _argv[flag+1];
+                        DDserver::crt_file_path = DDserver::crt_file_path.substr(0, 7) + _argv[flag + 1];
                         break;
 
                     case KEYFILE:
-                        DDserver::key_file_path = DDserver::key_file_path.substr(0, 7) + _argv[flag+1];
+                        DDserver::key_file_path = DDserver::key_file_path.substr(0, 7) + _argv[flag + 1];
                         break;
 
                     case APIKEY:
-                        DDserver::api_key = _argv[flag+1];
+                        DDserver::api_key = _argv[flag + 1];
                         DDserver::custom_api_key = true;
                         break;
 
@@ -279,7 +279,7 @@ namespace DoubleD
 
             bool _released{ false };
             DDserver::storageMutex.lock();
-            for (long unsigned int i = 0; i < DDserver::lockVector.size(); i++) {
+            for (size_t i = 0; i < DDserver::lockVector.size(); i++) {
 
                 if (_lockName == DDserver::lockVector[i].m_getName() &&
                     _session_token == DDserver::lockVector[i].m_getSessionToken())
@@ -295,7 +295,7 @@ namespace DoubleD
             x["lockname"] = _lockName;
             return crow::response(_released ? 200 : 400, x);
         });
-        std::thread _lifeTime_thread(&DDserver::checkLifetimes);        
+        std::thread _lifeTime_thread(&DDserver::checkLifetimes);
 
         // configure the app instance with given parameters
         app.port(DDserver::port).server_name(DDserver::server_name).concurrency(DDserver::threads);
@@ -327,7 +327,7 @@ namespace DoubleD
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::precision));
             DDserver::storageMutex.lock();
-            for (unsigned int i = 0; i < DDserver::lockVector.size(); i++)
+            for (size_t i = 0; i < DDserver::lockVector.size(); i++)
             {
                 if (DDserver::lockVector[i].m_expired())
                 {
