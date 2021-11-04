@@ -1,7 +1,9 @@
 #pragma once
-#include <boost/thread.hpp>
+#include <thread>
+#include <mutex>
 #include <string>
 #include <vector>
+#include <optional>
 #include "Lock.h"
 
 namespace DoubleD
@@ -14,7 +16,7 @@ namespace DoubleD
 		static bool is_https, error, isRunning, custom_api_key;
 
 	private:
-		static boost::mutex storageMutex;
+		static std::mutex storageMutex;
 		static std::vector<Lock> lockVector;
 
 	private:

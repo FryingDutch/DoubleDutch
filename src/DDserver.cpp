@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <mutex>
 #include <optional>
 #include "DDserver.h"
 
@@ -26,7 +27,7 @@ namespace DoubleD
     bool DDserver::custom_api_key{ false };
 
     std::vector<Lock> DDserver::lockVector;
-    boost::mutex DDserver::storageMutex;
+    std::mutex DDserver::storageMutex;
 
     //setting functions
     void DDserver::errormsg(const char* message)
