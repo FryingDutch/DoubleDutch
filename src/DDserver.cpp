@@ -12,7 +12,7 @@
 
 namespace DoubleD
 {
-    std::string DDserver::server_name = "DoubleDutch/v0.2.1";
+    std::string DDserver::server_name = "DoubleDutch/v0.2.2";
     std::string DDserver::crt_file_path = "/certificate.crt";
     std::string DDserver::key_file_path = "/privateKey.key";
     std::string DDserver::api_key;
