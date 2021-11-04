@@ -10,7 +10,7 @@ API_KEY = 'test'
 NUMBER_OF_LOCKS = 1000
 
 # Start the server, wait for one second so that it can properly boot.
-subprocess.Popen(['./server', PORT, 'h', '0', 'a', API_KEY])
+subprocess.Popen(['/server', PORT, 'h', '0', 'a', API_KEY])
 time.sleep(1)
 
 
