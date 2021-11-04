@@ -26,8 +26,8 @@ namespace DoubleD
 
 		//functions that are being used to define runtime situations
 		static void startup();
-		static boost::optional<Lock> handleRequest(std::string lockName, const uint32_t TIMEOUT, const double LIFETIME);
-		static boost::optional<Lock> getLock(std::string lockName, const double LIFETIME);
+		static std::optional<Lock> handleRequest(std::string lockName, const uint32_t TIMEOUT, const double LIFETIME);
+		static std::optional<Lock> getLock(std::string lockName, const double LIFETIME);
 
 		//dedicated thread
 		static void checkLifetimes();
