@@ -6,24 +6,25 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <optional>
 #include <boost/optional.hpp>
 #include "DDserver.h"
 
 namespace DoubleD
 {
-    std::string DDserver::server_name = "DoubleDutch/v0.1";
-    std::string DDserver::crt_file_path = "../SSL/certificate.crt";
-    std::string DDserver::key_file_path = "../SSL/privateKey.key";
+    std::string DDserver::server_name = "DoubleDutch/v0.2.1";
+    std::string DDserver::crt_file_path = "/certificate.crt";
+    std::string DDserver::key_file_path = "/privateKey.key";
     std::string DDserver::api_key;
 
-    int DDserver::port = 1;
-    int DDserver::precision = 333;
-    int DDserver::threads = std::thread::hardware_concurrency();
+    int32_t DDserver::port{1};
+    int32_t DDserver::precision{333};
+    int32_t DDserver::threads{std::thread::hardware_concurrency()};
 
-    bool DDserver::is_https = true;
-    bool DDserver::error = false;
-    bool DDserver::isRunning = true;
-    bool DDserver::custom_api_key = false;
+    bool DDserver::is_https{true}
+    bool DDserver::error{false};
+    bool DDserver::isRunning {true};
+    bool DDserver::custom_api_key{false};
 
     std::vector<Lock> DDserver::lockVector;
     boost::mutex DDserver::storageMutex;
@@ -37,7 +38,7 @@ namespace DoubleD
 
     bool DDserver::isDigit(std::string str)
     {
-        for (long unsigned int i = 0; i < str.length(); i++)
+        for (size_t i = 0; i < str.length(); i++)
         {
             if (!std::isdigit(str[i]))
             {
@@ -47,7 +48,7 @@ namespace DoubleD
         return true;
     }
 
-    void DDserver::handleCommandLineArguments(char* _argv[], int _argc)
+    void DDserver::handleCommandLineArguments(char* _argv[], int32_t _argc)
     {
         //if the argument count is higher then one (Need at least portnumber)
         //and the argument count is even (every prefix needs a value)
@@ -63,7 +64,7 @@ namespace DoubleD
             };
 
             //for every flag check and assign the user input to the correct variable
-            for (int flag = 2; flag < _argc; flag += 2)
+            for (size_t flag = 2; flag < _argc; flag += 2)
             {
                 //if the value next to the flag is a digit
                 if (DDserver::isDigit(_argv[flag + 1]))
@@ -79,7 +80,7 @@ namespace DoubleD
                         break;
 
                     case HTTPS:
-                        if (std::stoi(_argv[flag+1]) == false)
+                        if (std::stoi(_argv[flag+1]) == 0)
                         {
                             DDserver::is_https = false;
                         }
@@ -133,7 +134,7 @@ namespace DoubleD
     // reads the API key from a file, and assigns its string value to DDserver::api_key
     void DDserver::loadApiKey()
     {
-        std::ifstream _keyFile("../config.txt", std::ios::in);
+        std::ifstream _keyFile("/config.txt", std::ios::in);
         if (_keyFile.is_open())
         {
             std::string _apiKey;
@@ -148,7 +149,7 @@ namespace DoubleD
         else DDserver::errormsg("No API-key file found");
     }
 
-    void DDserver::setAndBoot(int _argc, char* _argv[])
+    void DDserver::setAndBoot(int32_t _argc, char* _argv[])
     {
         DDserver::handleCommandLineArguments(_argv, _argc);
         if (!DDserver::custom_api_key) DDserver::loadApiKey();
@@ -195,7 +196,7 @@ namespace DoubleD
             x["locks"] = jsonList;
 
             DDserver::storageMutex.lock();
-            for (long unsigned int i = 0; i < DDserver::lockVector.size(); i++) {
+            for (size_t i = 0; i < DDserver::lockVector.size(); i++) {
                 x["locks"][i]["lockname"] = DDserver::lockVector[i].m_getName();
                 x["locks"][i]["sessiontoken"] = DDserver::lockVector[i].m_getSessionToken();
                 x["locks"][i]["remaining"] = DDserver::lockVector[i].m_timeLeft();
@@ -345,7 +346,7 @@ namespace DoubleD
         // determine whether the lock with <lockName> is free/available
         bool _free{ true };
         DDserver::storageMutex.lock();
-        for (long unsigned int i = 0; i < DDserver::lockVector.size(); i++)
+        for (size_t i = 0; i < DDserver::lockVector.size(); i++)
         {
             if (lockName == DDserver::lockVector[i].m_getName() && !DDserver::lockVector[i].m_expired())
             {
@@ -365,7 +366,7 @@ namespace DoubleD
     }
 
     // calls m_getLock until a lock has been acquired. Returns boost::none if timed-out. 
-    boost::optional<Lock> DDserver::handleRequest(std::string lockName, const unsigned int TIMEOUT, const double LIFETIME)
+    boost::optional<Lock> DDserver::handleRequest(std::string lockName, const uint32_t TIMEOUT, const double LIFETIME)
     {
         auto startTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> difference;

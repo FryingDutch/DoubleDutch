@@ -31,17 +31,18 @@ RUN cmake .. &&\
     make
 
 FROM base AS finalimage
-COPY --from=builder /DoubleDutch/SSL/ /DoubleDutch/SSL/
-COPY --from=builder /DoubleDutch/config.txt /DoubleDutch/config.txt
-COPY --from=builder /DoubleDutch/build/src/server /DoubleDutch/build/ 
-WORKDIR /DoubleDutch/build/
+COPY --from=builder /DoubleDutch/SSL/ /
+COPY --from=builder /DoubleDutch/config.txt /
+COPY --from=builder /DoubleDutch/build/src/server /
 
 FROM finalimage AS dev
 CMD [ "/bin/bash" ]
 
 # Run tests in a Python image based on ubuntu.
 FROM fnndsc/ubuntu-python3:ubuntu20.04-python3.8.10 as test
-COPY --from=finalimage /DoubleDutch /DoubleDutch
+COPY --from=finalimage /config.txt /
+COPY --from=finalimage /server /
+
 WORKDIR /DoubleDutch/build
 RUN pip install requests pytest
 COPY tests/test_server.py test_server.py
@@ -50,4 +51,4 @@ RUN echo "tests completed" >> /test_results.log
 
 FROM finalimage AS production
 COPY --from=test /test_results.log /test_results.log
-ENTRYPOINT ["./server"]
+ENTRYPOINT ["/server"]
