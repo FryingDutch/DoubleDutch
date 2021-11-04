@@ -21,7 +21,7 @@ r = requests.get("https://<host>:<port>/getlock?auth=randomapikey&lockname=<lock
 When the lock on `<lockname>` was acquired, the server will return the following JSON:
 ```json
 {
-    "servername":    "DoubleDutch/v0.1",
+    "servername":    "DoubleDutch/<version>",
     "lockname" :     "<lockname>",
     "sessiontoken" : "<sessiontoken>",   
     "lockacquired" :  true 
@@ -37,7 +37,7 @@ r = requests.delete("https://<host>:<port>/releaselock?lockname=<lockname>&token
 The result would be:
 ```json
 {
-    "servername"   : "DoubleDutch/v0.1",
+    "servername"   : "DoubleDutch/<version>",
     "lockname"     : "<lockname>",
     "lockreleased" : true
 }
@@ -46,7 +46,7 @@ The result would be:
 To query the status of the server (and all of the locks that are currently active), you can request the `status`-endpoint. This will return the following JSON:
 ```json
 {
-    "servername" : "DoubleDutch/v0.1",
+    "servername" : "DoubleDutch/<version>",
     "status"     : "ok",
     "locks": [
         {
@@ -78,7 +78,7 @@ docker run -p 8000:8000 server 8000
 
 - **Name:** Give the server your own name.  
  This is especially useful when you want to use multiple servers for different applications.  
- By default this is "DoubleDutch/v0.1".
+ By default this is "DoubleDutch/<version>".
 ```bash
 n myServerName
 ```
