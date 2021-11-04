@@ -21,7 +21,7 @@ namespace DoubleD
     int32_t DDserver::precision{333};
     int32_t DDserver::threads{std::thread::hardware_concurrency()};
 
-    bool DDserver::is_https{true}
+    bool DDserver::is_https{true};
     bool DDserver::error{false};
     bool DDserver::isRunning {true};
     bool DDserver::custom_api_key{false};
