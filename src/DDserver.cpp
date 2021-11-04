@@ -7,12 +7,11 @@
 #include <vector>
 #include <thread>
 #include <optional>
-#include <boost/optional.hpp>
 #include "DDserver.h"
 
 namespace DoubleD
 {
-    std::string DDserver::server_name = "DoubleDutch/v0.2.2";
+    std::string DDserver::server_name = "DoubleDutch/v0.2.1";
     std::string DDserver::crt_file_path = "/certificate.crt";
     std::string DDserver::key_file_path = "/privateKey.key";
     std::string DDserver::api_key;
@@ -252,8 +251,8 @@ namespace DoubleD
                 _timeout = 0.0f;
             }
 
-            boost::optional<Lock> _lock = DDserver::handleRequest(_lockName, _timeout, _lifetime);
-            x["sessiontoken"] = _lock ? _lock.get().m_getSessionToken() : "";
+            std::optional<Lock> _lock = DDserver::handleRequest(_lockName, _timeout, _lifetime);
+            x["sessiontoken"] = _lock ? _lock.value().m_getSessionToken() : "";
             x["lockacquired"] = _lock ? true : false;
             x["lockname"] = _lockName;
             return crow::response(200, x);
@@ -341,7 +340,7 @@ namespace DoubleD
     }
 
     // returns a Lock if a Lock can be acquired, otherwise returns boost::none.
-    boost::optional<Lock> DDserver::getLock(std::string lockName, const double LIFETIME) {
+    std::optional<Lock> DDserver::getLock(std::string lockName, const double LIFETIME) {
 
         // determine whether the lock with <lockName> is free/available
         bool _free{ true };
@@ -356,23 +355,23 @@ namespace DoubleD
         }
 
         // insert a Lock if <lockName> is free/available
-        boost::optional<Lock> _lock;
+        std::optional<Lock> _lock;
         if (_free) {
             _lock = Lock(lockName, LIFETIME);
-            DDserver::lockVector.push_back(_lock.get());
+            DDserver::lockVector.push_back(_lock.value());
         }
         DDserver::storageMutex.unlock();
         return _lock;
     }
 
     // calls m_getLock until a lock has been acquired. Returns boost::none if timed-out. 
-    boost::optional<Lock> DDserver::handleRequest(std::string lockName, const uint32_t TIMEOUT, const double LIFETIME)
+    std::optional<Lock> DDserver::handleRequest(std::string lockName, const uint32_t TIMEOUT, const double LIFETIME)
     {
         auto startTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> difference;
         for (;;)
         {
-            boost::optional<Lock> lock = DDserver::getLock(lockName, LIFETIME);
+            std::optional<Lock> lock = DDserver::getLock(lockName, LIFETIME);
             auto currentTime = std::chrono::high_resolution_clock::now();
             difference = currentTime - startTime;
 

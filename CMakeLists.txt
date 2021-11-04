@@ -39,7 +39,7 @@ if (MSVC)
 	find_package( Boost 1.71 COMPONENTS system thread regex REQUIRED )
 	
 else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++1y -pedantic -Wextra")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++1z -pedantic -Wextra")
 	find_package( Boost 1.71 COMPONENTS system thread REQUIRED )
 	
 endif()
