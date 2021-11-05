@@ -60,10 +60,8 @@ To query the status of the server (and all of the locks that are currently activ
   
 ## Installation and set-up
 **Requirements:**  
-DoubleDutch needs a _.crt_ file named "certificate.crt" and a _.key_ file named "privateKey.key", in order to run on https.  
-You will have to place these files in the _SSL directory_.  
-The program also uses authentication trough API Key verification. To set the API key, you edit the _config.txt_ file.  
-  
+DoubleDutch needs a _.crt_ file named "certificate.crt" and a _.key_ file named "privateKey.key", at the root of the container, in order to run on https.  
+
 DoubleDutch runs inside a Docker container. To build using the provided _Dockerfile_:
 ```bash
 docker build . -t server
@@ -72,6 +70,12 @@ DoubleDutch needs at least the portnumber from the user.
 To run and listen for connections on port 8000:
 ```bash
 docker run -p 8000:8000 server 8000
+```
+This can also be achieved by modifying and using the provided *docker-compose* template.
+```bash
+docker-compose build
+# AND
+docker-compose up
 ```
 ## Customisation
 **Besides the default settings, DoubleDutch offers optional customisation.**
@@ -101,7 +105,7 @@ h 0
 ```
 - **.crt & .key:** setting the _.crt_ and _.key_ file.  
  The image expects to find a _certificate.crt_ and a _privateKey.key_ file to be found at the root ("/") of the container.
- DoubleDutch provides a template *docker-compose* file, which can be easily modified to set a custom path or filename.
+ DoubleDutch provides a template *docker-compose* file, which can be easily modified.
  ```yml
 secrets:
   key:
@@ -111,7 +115,7 @@ secrets:
 ```
 - **API-key:** setting _config_ file path/name.   
  As with the SSL-files, the image expects a _config.txt_ at the root of the container. 
- And also with the API-key you can easily modify your own custom path or filename trough the provided *docker-compose* template.
+ And also with the API-key you can easily modify the provided *docker-compose* template to achieve this.
  ```yml
 API-key:
     file: .\config.txt # change this if you want to use a different file location/name for the API-key
