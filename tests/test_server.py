@@ -1,16 +1,20 @@
+import threading
 import requests
 import subprocess
 import pytest
 import time
+from threading import Thread
 
 
 PORT = '8000'
 BASE_URL = f'http://0.0.0.0:{PORT}'
 API_KEY = 'test'
+NUMBER_OF_THREADS = "30"
 NUMBER_OF_LOCKS = 1000
+SERVER_NAME = "TestServer"
 
 # Start the server, wait for one second so that it can properly boot.
-subprocess.Popen(['/server', PORT, 'h', '0', 'a', API_KEY])
+subprocess.Popen(['/server', PORT, 'h', '0', 'a', API_KEY, 't', NUMBER_OF_THREADS, 'n', SERVER_NAME])
 time.sleep(1)
 
 
@@ -21,10 +25,23 @@ def test_no_locks():
 
 
 def test_many_locks():
-    # Fire off many requests (todo: parallellize this to inspect threading behaviour?).
-    for number in range(NUMBER_OF_LOCKS):
+    work = False
+    def thread_worker(number):
+        while not work:
+            time.sleep(0.001)
         get_lock = requests.get(f"{BASE_URL}/getlock?lockname={number}&auth={API_KEY}&lifetime=1000").json()
         assert get_lock['lockacquired'] == True, 'lock should be free'
+
+    # Fire off many requests (todo: parallellize this to inspect threading behaviour?).
+    threads = []
+    for number in range(NUMBER_OF_LOCKS):
+        thread = threading.Thread(target=thread_worker, args=(number,))
+        threads.append(thread)
+        threads[number].start()
+
+    work = True
+    for number in range(NUMBER_OF_LOCKS):
+        threads[number].join()       
         
     # Check whether there are now NUMBER_OF_LOCKS locks.
     status = requests.get(f"{BASE_URL}/status?auth={API_KEY}").json()
