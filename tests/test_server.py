@@ -1,4 +1,3 @@
-import threading
 import requests
 import subprocess
 import pytest
@@ -35,7 +34,7 @@ def test_many_locks():
     # Fire off many requests (todo: parallellize this to inspect threading behaviour?).
     threads = []
     for number in range(NUMBER_OF_LOCKS):
-        thread = threading.Thread(target=worker_thread, args=(number,))
+        thread = Thread(target=worker_thread, args=(number,))
         threads.append(thread)
         threads[number].start()
 
