@@ -78,7 +78,7 @@ docker run -p 8000:8000 server 8000
 
 - **Name:** Give the server your own name.  
  This is especially useful when you want to use multiple servers for different applications.  
- By default this is "DoubleDutch/<version>".
+ By default this is "DoubleDutch/\<version\>".
 ```bash
 n myServerName
 ```
