@@ -99,31 +99,27 @@ HTTPS is on by default.
 ```bash
 h 0
 ```
-- **.crt & .key:** naming the _.crt_ or _.key_ file.  
- If you want to use a different name for the _.crt_ or _.key_ file, you will have to give notice to DoubleDutch.  
- By default you'll have to use "certificate.crt" and "privateKey.key".
-```bash
-c newcertificate.crt
-#OR
-k differentKey.key
+- **.crt & .key:** setting the _.crt_ and _.key_ file.  
+ The image expects to find a _certificate.crt_ and a _privateKey.key_ file to be found at the root ("/") of the container.
+ DoubleDutch provides a template *docker-compose* file, which can be easily modified to set a custom path or filename.
+ ```yml
+secrets:
+  key:
+    file: D:\your\own\directory\certs\customkey.key # change this if you want to use https
+  crt:
+    file: D:\your\own\directory\certs\customcrt.crt # change this if you want to use https
 ```
-- **API-key:** If you dont want to use the config file.  
- If you rather not have your API-key in a file, you can also pass it as an argument:
+- **API-key:** setting _config_ file path/name.   
+ As with the SSL-files, the image expects a _config.txt_ at the root of the container. 
+ And also with the API-key you can easily modify your own custom path or filename trough the provided *docker-compose* template.
+ ```yml
+API-key:
+    file: .\config.txt # change this if you want to use a different file location/name for the API-key
+``` 
+ For other purposes, like testing, you can also pass it as an argument:
 ```bash
 a myRandomApiKeyString
 ```
-
-for example:
-```bash
-docker run -p 8000:8000 server 8000 n myOwnserver h 0
-#OR
-docker run -p 8000:8000 server 8000 p 250 k differentKey.key
-#OR
-docker run -p 8000:8000 server 8000 t 12 a myRandomString c newcert.crt
-
-#etc
-```
-
 
 ## Replication and fault-tolerance
 Distributed locks are used for roughly [two reasons](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html):
