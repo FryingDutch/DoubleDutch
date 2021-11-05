@@ -26,7 +26,7 @@ def test_no_locks():
 
 def test_many_locks():
     work = False
-    def thread_worker(number):
+    def worker_thread(number):
         while not work:
             time.sleep(0.001)
         get_lock = requests.get(f"{BASE_URL}/getlock?lockname={number}&auth={API_KEY}&lifetime=1000").json()
@@ -35,7 +35,7 @@ def test_many_locks():
     # Fire off many requests (todo: parallellize this to inspect threading behaviour?).
     threads = []
     for number in range(NUMBER_OF_LOCKS):
-        thread = threading.Thread(target=thread_worker, args=(number,))
+        thread = threading.Thread(target=worker_thread, args=(number,))
         threads.append(thread)
         threads[number].start()
 
