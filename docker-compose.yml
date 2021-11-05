@@ -14,9 +14,10 @@ services:
       - source: API-key
         target: config.txt
 secrets:
-  crt:
-    file: .\config.txt # change this if you want to use a different file location/name for the API-key
   key:
     file: D:\your\own\directory\certs\customkey.key # change this if you want to use https
+  crt:
+    file: D:\your\own\directory\certs\custcrt.key # change this if you want to use https
   API-key:
-    file: D:\your\own\directory\certs\config.txt # change this if you want to use https
+    file: .\config.txt # change this if you want to use a different file location/name for the API-key
+  
