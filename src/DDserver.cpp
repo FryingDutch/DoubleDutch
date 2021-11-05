@@ -12,7 +12,7 @@
 
 namespace DoubleD
 {
-    std::string DDserver::server_name = "DoubleDutch/v0.2.2";
+    std::string DDserver::server_name = "DoubleDutch/v0.2.3";
     std::string DDserver::crt_file_path = "/certificate.crt";
     std::string DDserver::key_file_path = "/privateKey.key";
     std::string DDserver::api_key;
@@ -102,14 +102,6 @@ namespace DoubleD
                     {
                     case NAME:
                         DDserver::server_name = _argv[flag + 1];
-                        break;
-
-                    case CRTFILE:
-                        DDserver::crt_file_path = DDserver::crt_file_path[0] + _argv[flag + 1];
-                        break;
-
-                    case KEYFILE:
-                        DDserver::key_file_path = DDserver::key_file_path[0] + _argv[flag + 1];
                         break;
 
                     case APIKEY:

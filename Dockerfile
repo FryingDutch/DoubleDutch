@@ -31,7 +31,6 @@ RUN cmake .. &&\
     make
 
 FROM base AS finalimage
-COPY --from=builder /DoubleDutch/SSL/ /
 COPY --from=builder /DoubleDutch/config.txt /
 COPY --from=builder /DoubleDutch/build/src/server /
 
