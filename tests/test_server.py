@@ -8,14 +8,13 @@ from threading import Thread
 PORT = '8000'
 BASE_URL = f'http://0.0.0.0:{PORT}'
 API_KEY = 'test'
-NUMBER_OF_THREADS = "30"
+NUMBER_OF_THREADS = "100"
 NUMBER_OF_LOCKS = 1000
 SERVER_NAME = "TestServer"
 
 # Start the server, wait for one second so that it can properly boot.
 subprocess.Popen(['/server', PORT, 'h', '0', 'a', API_KEY, 't', NUMBER_OF_THREADS, 'n', SERVER_NAME])
 time.sleep(1)
-
 
 def test_no_locks():
     # After booting, there should not be any locks.
@@ -25,19 +24,21 @@ def test_no_locks():
 
 def test_many_locks():
     work = False
+    # set up work for the threads
     def worker_thread(number):
         while not work:
             time.sleep(0.001)
         get_lock = requests.get(f"{BASE_URL}/getlock?lockname={number}&auth={API_KEY}&lifetime=1000").json()
         assert get_lock['lockacquired'] == True, 'lock should be free'
 
-    # Fire off many requests (todo: parallellize this to inspect threading behaviour?).
+    # create all the threads
     threads = []
     for number in range(NUMBER_OF_LOCKS):
         thread = Thread(target=worker_thread, args=(number,))
         threads.append(thread)
         threads[number].start()
 
+    # set threads to work
     work = True
     for number in range(NUMBER_OF_LOCKS):
         threads[number].join()       
@@ -51,6 +52,40 @@ def test_many_locks():
     # Check if the time remaining is valid for the 'last' lock.
     remaining = locks[-1]['remaining']
     assert remaining <= 1000.0 and remaining > 950.0, "unexpected time remaining"
+
+
+def test_race_condition():
+    work = False
+    # Set up the task for the threads
+    def worker_thread():
+        while not work:
+            pass
+        requests.get(f"{BASE_URL}/getlock?lockname=race_condition_test&auth={API_KEY}&lifetime=1000")
+    
+    # Set up the threads
+    threads = []
+    for number in range(int(NUMBER_OF_THREADS)):
+        thread = Thread(target=worker_thread)
+        threads.append(thread)
+        threads[number].start()
+   
+   # Set the total acquired locks, so the tests are not dependent on each others succes.
+    status = requests.get(f"{BASE_URL}/status?auth={API_KEY}").json()
+    locks = status['locks']
+    previous_acquired_locks = len(locks)
+
+   # Fire threads
+    work = True
+    for number in range(int(NUMBER_OF_THREADS)):
+        threads[number].join()
+
+    # Get the status of the locks
+    status = requests.get(f"{BASE_URL}/status?auth={API_KEY}").json()
+    locks = status['locks']
+    number_of_locks = len(locks)
+
+    # Check if only 1 lock has been acquired, but also take in account the last 1000 from previous test
+    assert number_of_locks == previous_acquired_locks + 1, "Only one lock should have been acquired."
 
     
 def test_lock_and_release():
