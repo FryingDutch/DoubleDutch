@@ -5,6 +5,7 @@ add_executable(server
 		main.cpp
 		lock.cpp
 		DDrequest.cpp
+		settings.cpp
 		DDserver.cpp
 		)
 
