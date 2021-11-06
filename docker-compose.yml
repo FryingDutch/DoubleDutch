@@ -3,7 +3,7 @@ version: "3"
 services:
   dd_server:
     build: .
-    command: "8000" # this is the port and is required as the first commandline argument ALWAYS
+    command: "8000 h 0" # this is the port and is required as the first commandline argument ALWAYS
     ports: 
       - "8000:8000"
     secrets:

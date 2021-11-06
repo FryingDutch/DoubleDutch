@@ -2,4 +2,6 @@ src/.vs/
 src/out/
 .vs/
 out/
+.vscode/
 README.md
+config.txt
