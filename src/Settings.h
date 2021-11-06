@@ -17,5 +17,6 @@ namespace DoubleD
 		static void loadApiKey();
 
 		friend class DDserver;
+		friend class LockManager;
 	};
 }
