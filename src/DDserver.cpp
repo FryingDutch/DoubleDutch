@@ -9,153 +9,12 @@
 #include <mutex>
 #include <optional>
 #include "DDserver.h"
+#include "Settings.h"
 
 namespace DoubleD
 {
-    std::string DDserver::server_name = "DoubleDutch/v0.3.0";
-    std::string DDserver::crt_file_path = "/certificate.crt";
-    std::string DDserver::key_file_path = "/privateKey.key";
-    std::string DDserver::api_key;
-
-    int32_t DDserver::port{ 1 };
-    int32_t DDserver::precision{ 333 };
-    int32_t DDserver::threads{ (int32_t)std::thread::hardware_concurrency() };
-
-    bool DDserver::is_https{ true };
-    bool DDserver::error{ false };
-    bool DDserver::isRunning{ true };
-    bool DDserver::custom_api_key{ false };
-
     std::vector<Lock> DDserver::lockVector;
     std::mutex DDserver::storageMutex;
-
-    //setting functions
-    void DDserver::errormsg(const char* message)
-    {
-        DDserver::error = true;
-        std::cerr << "[ERROR]: " << message << "! Terminating...\n";
-    }
-
-    bool DDserver::isDigit(std::string str)
-    {
-        for (size_t i = 0; i < str.length(); i++)
-        {
-            if (!std::isdigit(str[i]))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    void DDserver::handleCommandLineArguments(char* _argv[], uint32_t _argc)
-    {
-        //if the argument count is higher then one (Need at least portnumber)
-        //and the argument count is even (every prefix needs a value)
-        //and the portnumber is an actual digit
-        if (_argc > 1 && _argc % 2 == 0 && DDserver::isDigit(_argv[1]))
-        {
-            //set the port number
-            DDserver::port = std::stoi(_argv[1]);
-
-            enum : char
-            {
-                PRECISION = 'p', THREADS = 't', HTTPS = 'h', NAME = 'n', CRTFILE = 'c', KEYFILE = 'k', APIKEY = 'a'
-            };
-
-            //for every flag check and assign the user input to the correct variable
-            for (size_t flag = 2; flag < _argc; flag += 2)
-            {
-                //if the value next to the flag is a digit
-                if (DDserver::isDigit(_argv[flag + 1]))
-                {
-                    switch (*_argv[flag])
-                    {
-                    case PRECISION:
-                        DDserver::precision = std::stoi(_argv[flag + 1]);
-                        break;
-
-                    case THREADS:
-                        DDserver::threads = std::stoi(_argv[flag + 1]);
-                        break;
-
-                    case HTTPS:
-                        if (std::stoi(_argv[flag + 1]) == 0)
-                        {
-                            DDserver::is_https = false;
-                        }
-                        else
-                        {
-                            DDserver::errormsg("h only takes 0 as an argument");
-                        }
-                        break;
-
-                    default:
-                        DDserver::errormsg("Not a valid command-line flag");
-                        break;
-                    }
-                }
-
-                else
-                {
-                    switch (*_argv[flag])
-                    {
-                    case NAME:
-                        DDserver::server_name = _argv[flag + 1];
-                        break;
-
-                    case APIKEY:
-                        DDserver::api_key = _argv[flag + 1];
-                        DDserver::custom_api_key = true;
-                        break;
-
-                    default:
-                        DDserver::errormsg("Not a valid flag");
-                        break;
-                    }
-                }
-            }
-        }
-
-        else
-        {
-            DDserver::errormsg("Not a valid input");
-        }
-    }
-
-    // reads the API key from a file, and assigns its string value to DDserver::api_key
-    void DDserver::loadApiKey()
-    {
-        std::ifstream _keyFile("/config.txt", std::ios::in);
-        if (_keyFile.is_open())
-        {
-            std::string _apiKey;
-            std::getline(_keyFile, _apiKey);
-            _keyFile.close();
-
-            if (_apiKey != "") DDserver::api_key = _apiKey;
-
-            else DDserver::errormsg("Empty key file");
-        }
-
-        else DDserver::errormsg("No API-key file found");
-    }
-
-    void DDserver::setAndBoot(int32_t _argc, char* _argv[])
-    {
-        DDserver::handleCommandLineArguments(_argv, _argc);
-        if (!DDserver::custom_api_key) DDserver::loadApiKey();
-
-        if (DDserver::port > 0 && DDserver::threads > 0 && DDserver::precision > -1)
-        {
-            if (!DDserver::error) DDserver::startup();
-        }
-
-        else
-        {
-            DDserver::errormsg("Need [SIGNED INT] as argument");
-        }
-    }
 
     //runtime functions
     void DDserver::startup()
@@ -166,14 +25,14 @@ namespace DoubleD
             ([&](const crow::request& req) {
 
             crow::json::wvalue x;
-            x["servername"] = DDserver::server_name;
+            x["servername"] = Settings::server_name;
 
             if (req.url_params.get("auth") == nullptr)
             {
                 x["status"] = "no api key";
                 return crow::response(400, x);
             }
-            else if (DDserver::api_key != req.url_params.get("auth"))
+            else if (Settings::api_key != req.url_params.get("auth"))
             {
                 x["status"] = "invalid key";
                 return crow::response(401, x);
@@ -201,7 +60,7 @@ namespace DoubleD
             ([&](const crow::request& req)
         {
             crow::json::wvalue x;
-            x["servername"] = DDserver::server_name;
+            x["servername"] = Settings::server_name;
 
             // lockName
             std::string _lockName;
@@ -218,7 +77,7 @@ namespace DoubleD
                 x["error"] = "no api key supplied";
                 return crow::response(401, x);
             }
-            if (DDserver::api_key != req.url_params.get("auth"))
+            if (Settings::api_key != req.url_params.get("auth"))
             {
                 x["error"] = "invalid api key";
                 return crow::response(401, x);
@@ -256,7 +115,7 @@ namespace DoubleD
             ([&](const crow::request& req) {
             std::string _lockName, _session_token;
             crow::json::wvalue x;
-            x["servername"] = DDserver::server_name;
+            x["servername"] = Settings::server_name;
 
             if (req.url_params.get("lockname") == nullptr || req.url_params.get("token") == nullptr)
             {
@@ -291,9 +150,9 @@ namespace DoubleD
         std::thread _lifeTime_thread(&DDserver::checkLifetimes);
 
         // configure the app instance with given parameters
-        app.port(DDserver::port).server_name(DDserver::server_name).concurrency(DDserver::threads);
+        app.port(Settings::port).server_name(Settings::server_name).concurrency(Settings::threads);
 
-        if (DDserver::is_https) app.ssl_file(DDserver::crt_file_path, DDserver::key_file_path);
+        if (Settings::is_https) app.ssl_file(Settings::crt_file_path, Settings::key_file_path);
 
         try
         {
@@ -302,23 +161,23 @@ namespace DoubleD
 
         catch (boost::wrapexcept<boost::system::system_error>& error)
         {
-            DDserver::errormsg(".key / .crt file not found");
+            Settings::errormsg(".key / .crt file not found");
         }
 
         catch (const std::exception& ex)
         {
-            DDserver::errormsg("An error has occurred. ");
+            Settings::errormsg("An error has occurred. ");
             std::cerr << ex.what() << std::endl;
         }
-        DDserver::isRunning = false;
+        Settings::isRunning = false;
         _lifeTime_thread.join();
     }
 
     void DDserver::checkLifetimes()
     {
-        while (DDserver::isRunning)
+        while (Settings::isRunning)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::precision));
+            std::this_thread::sleep_for(std::chrono::milliseconds(Settings::precision));
             DDserver::storageMutex.lock();
             for (size_t i = 0; i < DDserver::lockVector.size(); i++)
             {
@@ -370,7 +229,24 @@ namespace DoubleD
 
             if (lock || difference.count() > TIMEOUT) return lock;
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(DDserver::precision));
+            std::this_thread::sleep_for(std::chrono::milliseconds(Settings::precision));
+        }
+    }
+
+    void DDserver::setAndBoot(int32_t _argc, char* _argv[])
+    {
+        Settings::handleCommandLineArguments(_argv, _argc);
+        if (!Settings::custom_api_key) Settings::loadApiKey();
+
+        if (Settings::port > 0 && Settings::threads > 0 && Settings::precision > -1)
+        {
+            if (!Settings::error) 
+                DDserver::startup();
+        }
+
+        else
+        {
+            Settings::errormsg("Need [SIGNED INT] as argument");
         }
     }
 }
