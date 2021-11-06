@@ -10,10 +10,10 @@
 #include <optional>
 #include "DDserver.h"
 #include "Settings.h"
+#include "LockManager.h"
 
 namespace DoubleD
 {
-    std::vector<Lock> DDserver::lockVector;
     std::mutex DDserver::storageMutex;
 
     //runtime functions
@@ -47,10 +47,10 @@ namespace DoubleD
             x["locks"] = jsonList;
 
             DDserver::storageMutex.lock();
-            for (size_t i = 0; i < DDserver::lockVector.size(); i++) {
-                x["locks"][i]["lockname"] = DDserver::lockVector[i].m_getName();
-                x["locks"][i]["sessiontoken"] = DDserver::lockVector[i].m_getSessionToken();
-                x["locks"][i]["remaining"] = DDserver::lockVector[i].m_timeLeft();
+            for (size_t i = 0; i < LockManager::lockVector.size(); i++) {
+                x["locks"][i]["lockname"] = LockManager::lockVector[i].m_getName();
+                x["locks"][i]["sessiontoken"] = LockManager::lockVector[i].m_getSessionToken();
+                x["locks"][i]["remaining"] = LockManager::lockVector[i].m_timeLeft();
             }
             DDserver::storageMutex.unlock();
             return crow::response(200, x);
@@ -131,13 +131,13 @@ namespace DoubleD
 
             bool _released{ false };
             DDserver::storageMutex.lock();
-            for (size_t i = 0; i < DDserver::lockVector.size(); i++) {
+            for (size_t i = 0; i < LockManager::lockVector.size(); i++) {
 
-                if (_lockName == DDserver::lockVector[i].m_getName() &&
-                    _session_token == DDserver::lockVector[i].m_getSessionToken())
+                if (_lockName == LockManager::lockVector[i].m_getName() &&
+                    _session_token == LockManager::lockVector[i].m_getSessionToken())
                 {
-                    DDserver::lockVector.erase(DDserver::lockVector.begin() + i);
-                    DDserver::lockVector.shrink_to_fit();
+                    LockManager::lockVector.erase(LockManager::lockVector.begin() + i);
+                    LockManager::lockVector.shrink_to_fit();
                     _released = true;
                     break;
                 }
@@ -147,7 +147,7 @@ namespace DoubleD
             x["lockname"] = _lockName;
             return crow::response(_released ? 200 : 400, x);
         });
-        std::thread _lifeTime_thread(&DDserver::checkLifetimes);
+        std::thread _lifeTime_thread(&LockManager::checkLifetimes);
 
         // configure the app instance with given parameters
         app.port(Settings::port).server_name(Settings::server_name).concurrency(Settings::threads);
@@ -173,49 +173,6 @@ namespace DoubleD
         _lifeTime_thread.join();
     }
 
-    void DDserver::checkLifetimes()
-    {
-        while (Settings::isRunning)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(Settings::precision));
-            DDserver::storageMutex.lock();
-            for (size_t i = 0; i < DDserver::lockVector.size(); i++)
-            {
-                if (DDserver::lockVector[i].m_expired())
-                {
-                    DDserver::lockVector.erase(DDserver::lockVector.begin() + i);
-                    DDserver::lockVector.shrink_to_fit();
-                }
-            }
-            DDserver::storageMutex.unlock();
-        }
-    }
-
-    // returns a Lock if a Lock can be acquired, otherwise returns boost::none.
-    std::optional<Lock> DDserver::getLock(std::string lockName, const double LIFETIME) {
-
-        // determine whether the lock with <lockName> is free/available
-        bool _free{ true };
-        DDserver::storageMutex.lock();
-        for (size_t i = 0; i < DDserver::lockVector.size(); i++)
-        {
-            if (lockName == DDserver::lockVector[i].m_getName() && !DDserver::lockVector[i].m_expired())
-            {
-                _free = false;
-                break;
-            }
-        }
-
-        // insert a Lock if <lockName> is free/available
-        std::optional<Lock> _lock;
-        if (_free) {
-            _lock = Lock(lockName, LIFETIME);
-            DDserver::lockVector.push_back(_lock.value());
-        }
-        DDserver::storageMutex.unlock();
-        return _lock;
-    }
-
     // calls m_getLock until a lock has been acquired. Returns boost::none if timed-out. 
     std::optional<Lock> DDserver::handleRequest(std::string lockName, const uint32_t TIMEOUT, const double LIFETIME)
     {
@@ -223,7 +180,7 @@ namespace DoubleD
         std::chrono::duration<double> difference;
         for (;;)
         {
-            std::optional<Lock> lock = DDserver::getLock(lockName, LIFETIME);
+            std::optional<Lock> lock = LockManager::getLock(lockName, LIFETIME);
             auto currentTime = std::chrono::high_resolution_clock::now();
             difference = currentTime - startTime;
 
