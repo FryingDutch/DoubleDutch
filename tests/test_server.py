@@ -18,8 +18,10 @@ time.sleep(1)
 def test_no_locks():
     # After booting, there should not be any locks.
     status = requests.get(f"{BASE_URL}/status?auth={API_KEY}").json()
+    assert status['status'] ==  "ok", "everything should be set when booted"
+    assert status['servername'] ==  SERVER_NAME, "name flag should have changed the name"
     assert not status['locks'], "no locks should be there"
-
+    
 
 def test_many_locks():
     for number in range(NUMBER_OF_LOCKS):
@@ -46,11 +48,11 @@ def test_race_condition():
         requests.get(f"{BASE_URL}/getlock?lockname=race_condition_test&auth={API_KEY}&lifetime=1000")
     
     # Set up the threads
-    threads = []
+    list_of_threads = []
     for number in range(int(NUMBER_OF_THREADS)):
         thread = Thread(target=worker_thread)
-        threads.append(thread)
-        threads[number].start()
+        list_of_threads.append(thread)
+        list_of_threads[number].start()
    
    # Set the total acquired locks, so the tests are not dependent on each others succes.
     status = requests.get(f"{BASE_URL}/status?auth={API_KEY}").json()
@@ -60,7 +62,7 @@ def test_race_condition():
    # Fire threads
     work = True
     for number in range(int(NUMBER_OF_THREADS)):
-        threads[number].join()
+        list_of_threads[number].join()
 
     # Get the status of the locks
     status = requests.get(f"{BASE_URL}/status?auth={API_KEY}").json()
