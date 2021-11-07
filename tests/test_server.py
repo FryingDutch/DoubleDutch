@@ -7,7 +7,7 @@ from threading import Thread
 PORT = '8000'
 BASE_URL = f'http://0.0.0.0:{PORT}'
 API_KEY = 'test'
-NUMBER_OF_THREADS = "100"
+NUMBER_OF_THREADS = "30"
 NUMBER_OF_LOCKS = 1000
 SERVER_NAME = "TestServer"
 
@@ -22,25 +22,9 @@ def test_no_locks():
 
 
 def test_many_locks():
-    work = False
-    # set up work for the threads
-    def worker_thread(number):
-        while not work:
-            time.sleep(0.001)
+    for number in range(NUMBER_OF_LOCKS):
         get_lock = requests.get(f"{BASE_URL}/getlock?lockname={number}&auth={API_KEY}&lifetime=1000").json()
-        assert get_lock['lockacquired'] == True, 'lock should be free'
-
-    # create all the threads
-    threads = []
-    for number in range(NUMBER_OF_LOCKS):
-        thread = Thread(target=worker_thread, args=(number,))
-        threads.append(thread)
-        threads[number].start()
-
-    # set threads to work
-    work = True
-    for number in range(NUMBER_OF_LOCKS):
-        threads[number].join()       
+        assert get_lock['lockacquired'] == True, 'lock should be free'  
         
     # Check whether there are now NUMBER_OF_LOCKS locks.
     status = requests.get(f"{BASE_URL}/status?auth={API_KEY}").json()
