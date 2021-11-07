@@ -8,7 +8,6 @@ FROM base AS dependencies
 RUN apt-get update &&\
     apt-get install -yq cmake gcc g++ &&\
     apt-get install -yq libcurl4-openssl-dev &&\
-    apt-get install -yq libjsoncpp-dev &&\
     apt-get install -yq libboost-all-dev &&\
     apt-get install -yq libssl-dev &&\
     apt-get install -yq git &&\
