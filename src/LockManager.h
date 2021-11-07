@@ -7,7 +7,7 @@ namespace DoubleD
 {
 	struct LockManager
 	{
-	public:
+	private:
 		static std::vector<Lock> lockVector;
 
 	private:

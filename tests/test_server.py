@@ -4,7 +4,6 @@ import pytest
 import time
 from threading import Thread
 
-
 PORT = '8000'
 BASE_URL = f'http://0.0.0.0:{PORT}'
 API_KEY = 'test'
@@ -121,7 +120,6 @@ def test_lock_and_expire():
     again = requests.get(f"{BASE_URL}/getlock?lockname={lock_name}&auth={API_KEY}&timeout=1").json()
     assert again['lockacquired'] == True, f"lock {lock_name} should now be free/expired"
     
-
 
 def test_auth():
     # Check that the status/ endpoint can't be queried without api key.
