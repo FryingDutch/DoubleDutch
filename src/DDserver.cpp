@@ -11,6 +11,7 @@
 #include "DDserver.h"
 #include "Settings.h"
 #include "LockManager.h"
+#include "Request.h"
 
 namespace DoubleD
 {

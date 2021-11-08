@@ -4,13 +4,14 @@
 
 namespace DoubleD
 {
-	struct DDrequest
+	struct Request
 	{
 	public:
 		cpr::Response response;
 		std::string text;
 
-	public:
+	public: 
 		void GET(const char* _URL);
+		void POST(const char* _URL, std::string _apikey, std::string _lockname);
 	};
 }
