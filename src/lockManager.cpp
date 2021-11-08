@@ -1,4 +1,6 @@
 #include <vector>
+#include <thread>
+#include <string>
 #include <optional>
 #include "Lock.h"
 #include "Settings.h"
@@ -8,6 +10,7 @@
 namespace DoubleD
 {
     std::vector<Lock> LockManager::lockVector;
+
     // returns a Lock if a Lock can be acquired, otherwise returns boost::none.
     std::optional<Lock> LockManager::getLock(std::string lockName, const double LIFETIME) 
     {
@@ -22,7 +25,6 @@ namespace DoubleD
                 break;
             }
         }
-
         // insert a Lock if <lockName> is free/available
         std::optional<Lock> _lock;
         if (_free) {
