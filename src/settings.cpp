@@ -22,7 +22,7 @@ namespace DoubleD
     //setting functions
     void Settings::errormsg(const char* message)
     {
-        Settings::error = true;
+        error = true;
         std::cerr << "[ERROR]: " << message << "! Terminating...\n";
     }
 
@@ -46,7 +46,7 @@ namespace DoubleD
         if (_argc > 1 && _argc % 2 == 0 && Settings::isDigit(_argv[1]))
         {
             //set the port number
-            Settings::port = std::stoi(_argv[1]);
+            port = std::stoi(_argv[1]);
 
             enum : char
             {
@@ -57,31 +57,31 @@ namespace DoubleD
             for (size_t flag = 2; flag < _argc; flag += 2)
             {
                 //if the value next to the flag is a digit
-                if (Settings::isDigit(_argv[flag + 1]))
+                if (isDigit(_argv[flag + 1]))
                 {
                     switch (*_argv[flag])
                     {
                     case PRECISION:
-                        Settings::precision = std::stoi(_argv[flag + 1]);
+                        precision = std::stoi(_argv[flag + 1]);
                         break;
 
                     case THREADS:
-                        Settings::threads = std::stoi(_argv[flag + 1]);
+                        threads = std::stoi(_argv[flag + 1]);
                         break;
 
                     case HTTPS:
                         if (std::stoi(_argv[flag + 1]) == 0)
                         {
-                            Settings::is_https = false;
+                            is_https = false;
                         }
                         else
                         {
-                            Settings::errormsg("h only takes 0 as an argument");
+                            errormsg("h only takes 0 as an argument");
                         }
                         break;
 
                     default:
-                        Settings::errormsg("Not a valid command-line flag");
+                        errormsg("Not a valid command-line flag");
                         break;
                     }
                 }
@@ -91,16 +91,16 @@ namespace DoubleD
                     switch (*_argv[flag])
                     {
                     case NAME:
-                        Settings::server_name = _argv[flag + 1];
+                        server_name = _argv[flag + 1];
                         break;
 
                     case APIKEY:
-                        Settings::api_key = _argv[flag + 1];
-                        Settings::custom_api_key = true;
+                        api_key = _argv[flag + 1];
+                        custom_api_key = true;
                         break;
 
                     default:
-                        Settings::errormsg("Not a valid flag");
+                        errormsg("Not a valid flag");
                         break;
                     }
                 }
@@ -109,7 +109,7 @@ namespace DoubleD
 
         else
         {
-            Settings::errormsg("Not a valid input");
+            errormsg("Not a valid input");
         }
     }
 
@@ -123,11 +123,13 @@ namespace DoubleD
             std::getline(_keyFile, _apiKey);
             _keyFile.close();
 
-            if (_apiKey != "") Settings::api_key = _apiKey;
+            if (_apiKey != "") 
+                api_key = _apiKey;
 
-            else Settings::errormsg("Empty key file");
+            else 
+                errormsg("Empty key file");
         }
 
-        else Settings::errormsg("No API-key file found");
+        else errormsg("No API-key file found");
     }
 }
