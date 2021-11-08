@@ -2,7 +2,10 @@ version: "3.3"
 
 services:
   dd_server:
-    build: .
+    build:
+      context: . 
+      args:
+        DO_BUILD: production
     command: "8000 h 0" # this is the port and is required as the first commandline argument ALWAYS
     ports: 
       - "8000:8000"
