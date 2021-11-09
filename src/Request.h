@@ -7,11 +7,12 @@ namespace DoubleD
 	struct Request
 	{
 	public:
-		cpr::Response response;
 		std::string text;
+		crow::json::wvalue json;
 
 	public: 
-		void GET(const char* _URL);
+		Request& GET(const char* _URL);
 		void POST(const char* _URL, std::string _apikey, std::string _lockname);
+		crow::json::wvalue JSON();
 	};
 }
