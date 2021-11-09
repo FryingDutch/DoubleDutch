@@ -4,7 +4,7 @@
 
 namespace DoubleD
 {
-    std::string Settings::server_name = "DoubleDutch/v0.3.0";
+    std::string Settings::server_name = "DoubleDutch/v0.3.1";
     std::string Settings::crt_file_path = "/certificate.crt";
     std::string Settings::key_file_path = "/privateKey.key";
     std::string Settings::api_key;
