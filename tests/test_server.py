@@ -7,8 +7,8 @@ from threading import Thread
 PORT = '8000'
 BASE_URL = f'http://0.0.0.0:{PORT}'
 API_KEY = 'test'
-NUMBER_OF_THREADS = "30"
-NUMBER_OF_LOCKS = 1000
+NUMBER_OF_THREADS = "30" 
+NUMBER_OF_LOCKS = 1000 
 SERVER_NAME = "TestServer"
 
 # Start the server, wait for one second so that it can properly boot.

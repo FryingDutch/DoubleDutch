@@ -11,6 +11,7 @@
 #include "DDserver.h"
 #include "Settings.h"
 #include "LockManager.h"
+#include "Request.h"
 
 namespace DoubleD
 {
@@ -46,13 +47,13 @@ namespace DoubleD
             std::vector<std::string> jsonList;
             x["locks"] = jsonList;
 
-            DDserver::storageMutex.lock();
+            storageMutex.lock();
             for (size_t i = 0; i < LockManager::lockVector.size(); i++) {
                 x["locks"][i]["lockname"] = LockManager::lockVector[i].m_getName();
                 x["locks"][i]["sessiontoken"] = LockManager::lockVector[i].m_getSessionToken();
                 x["locks"][i]["remaining"] = LockManager::lockVector[i].m_timeLeft();
             }
-            DDserver::storageMutex.unlock();
+            storageMutex.unlock();
             return crow::response(200, x);
         });
 
@@ -103,10 +104,14 @@ namespace DoubleD
                 _timeout = 0.0f;
             }
 
-            std::optional<Lock> _lock = DDserver::handleRequest(_lockName, _timeout, _lifetime);
+            std::optional<Lock> _lock = handleRequest(_lockName, _timeout, _lifetime);
             x["sessiontoken"] = _lock ? _lock.value().m_getSessionToken() : "";
             x["lockacquired"] = _lock ? true : false;
             x["lockname"] = _lockName;
+            Request r;
+            std::string url = "http://0.0.0.0:8000/getlock?auth=" + Settings::api_key + "&lockname=" + _lockName;
+            r.GET(url.c_str());
+            std::cout << r.text << "\n";
             return crow::response(200, x);
         });
 
@@ -130,7 +135,7 @@ namespace DoubleD
             }
 
             bool _released{ false };
-            DDserver::storageMutex.lock();
+            storageMutex.lock();
             for (size_t i = 0; i < LockManager::lockVector.size(); i++) {
 
                 if (_lockName == LockManager::lockVector[i].m_getName() &&
@@ -142,7 +147,7 @@ namespace DoubleD
                     break;
                 }
             }
-            DDserver::storageMutex.unlock();
+            storageMutex.unlock();
             x["lockreleased"] = _released;
             x["lockname"] = _lockName;
             return crow::response(_released ? 200 : 400, x);

@@ -4,7 +4,7 @@ project ( server )
 add_executable(server 
 		main.cpp
 		lock.cpp
-		DDrequest.cpp
+		request.cpp
 		settings.cpp
 		lockManager.cpp
 		DDserver.cpp
