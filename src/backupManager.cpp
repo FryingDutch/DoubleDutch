@@ -8,7 +8,7 @@ namespace DoubleD
 	void BackupManager::sendBackup(std::string _ip, std::string _lockName)
 	{
 		Request r;
-		std::string url = "http://" + _ip + "/getlock?auth=" + Settings::api_key + "&lockname=" + _lockName;
+		std::string url = "http://" + _ip + ":" + std::to_string(Settings::port) + "/getlock?auth=" + Settings::api_key + "&lockname=" + _lockName;
 		r.GET(url.c_str());
 	}
 
