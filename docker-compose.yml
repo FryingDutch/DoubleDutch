@@ -3,24 +3,24 @@ version: "3.3"
 services:
   dd_server:
     build:
-      context: . 
+      context: .
       args:
         DO_BUILD: production
-    command: "8000 h 0" # this is the port and is required as the first commandline argument ALWAYS
+    command: "8000 h 0" # The port is required as the first commandline argument ALWAYS
     ports: 
       - "8000:8000"
     secrets:
-      - source: crt
-        target: /certificate.crt
-      - source: key
-        target: /privateKey.key
+#      - source: crt                                # Uncomment if you want to use https
+#        target: /certificate.crt
+#      - source: key
+#        target: /privateKey.key
       - source: API-key
         target: /config.txt
 secrets:
-  key:
-    file: D:\your\own\directory\certs\customkey.key # change this if you want to use https
-  crt:
-    file: D:\your\own\directory\certs\customcrt.crt # change this if you want to use https
+#  key:
+#    file: D:\your\own\directory\certs\customkey.key # change this if you want to use https         # uncomment for https
+#  crt:
+#    file: D:\your\own\directory\certs\customcrt.crt # change this if you want to use https
   API-key:
     file: ./config.txt # change this if you want to use a different file location/name for the API-key
   
