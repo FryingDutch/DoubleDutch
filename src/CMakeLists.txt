@@ -7,6 +7,7 @@ add_executable(server
 		request.cpp
 		settings.cpp
 		lockManager.cpp
+		backupManager.cpp
 		DDserver.cpp
 		)
 
