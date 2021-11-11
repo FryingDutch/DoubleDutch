@@ -23,5 +23,6 @@ namespace DoubleD
 		static void setAndBoot(int _argc, char* _argv[]);
 	
 		friend class LockManager;
+		friend class BackupManager;
 	};
 }

@@ -108,10 +108,7 @@ namespace DoubleD
             x["sessiontoken"] = _lock ? _lock.value().m_getSessionToken() : "";
             x["lockacquired"] = _lock ? true : false;
             x["lockname"] = _lockName;
-            Request r;
-            std::string url = "http://0.0.0.0:8000/getlock?auth=" + Settings::api_key + "&lockname=" + _lockName;
-            r.GET(url.c_str());
-            std::cout << r.text << "\n";
+
             return crow::response(200, x);
         });
 
@@ -152,6 +149,13 @@ namespace DoubleD
             x["lockname"] = _lockName;
             return crow::response(_released ? 200 : 400, x);
         });
+
+        CROW_ROUTE(app, "/backup").methods("POST"_method)
+            ([&](const crow::request& req) {
+            crow::json::wvalue x = crow::json::load(req.body);
+            return crow::response(200, x);
+        });
+
         std::thread _lifeTime_thread(&LockManager::checkLifetimes);
 
         // configure the app instance with given parameters

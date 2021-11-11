@@ -2,6 +2,8 @@
 #include <string>
 #include "crow.h"
 #include "Request.h"
+#include "DDserver.h"
+#include "LockManager.h"
 
 namespace DoubleD
 {
@@ -26,11 +28,9 @@ namespace DoubleD
 		return *this;
 	}
 
-	void Request::POST(const char* _URL, std::string _apikey, std::string _lockname)
+	Request& Request::POST(const char* _URL)
 	{
-		cpr::Response response = cpr::Post(cpr::Url{ _URL },
-			cpr::Payload{ {"auth", _apikey},{"lockname", _lockname } }
-		);
+		
 	}
 
 	crow::json::wvalue& Request::JSON()

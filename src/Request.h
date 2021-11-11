@@ -15,7 +15,7 @@ namespace DoubleD
 
 	public: 
 		Request& GET(const char* _URL);
-		void POST(const char* _URL, std::string _apikey, std::string _lockname);
+		Request& POST(const char* _URL);
 		crow::json::wvalue& JSON();
 		std::string& string();
 		uint32_t& statusCode();

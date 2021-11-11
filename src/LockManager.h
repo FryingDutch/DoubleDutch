@@ -17,5 +17,6 @@ namespace DoubleD
 		static void checkLifetimes();
 
 		friend class DDserver;
+		friend class BackupManager;
 	};
 }
