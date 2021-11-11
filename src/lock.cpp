@@ -12,6 +12,12 @@ namespace DoubleD
 		m_session_token = Lock::m_createToken();
 	}
 
+	Lock::Lock(std::string _name, double _remainingTime, std::string _session_token)
+		: m_name(_name), m_session_token(_session_token), m_lifeTime(_remainingTime)
+	{
+		m_start = std::chrono::high_resolution_clock::now();
+	}
+
 	std::string Lock::m_createToken()
 	{
 		static std::string str =

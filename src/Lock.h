@@ -16,6 +16,7 @@ namespace DoubleD
 
     public:
         Lock(std::string _name, double _lifeTime);
+        Lock(std::string _name, double _remainingTime, std::string _session_token);
         bool m_expired();
         double m_timeLeft();
         std::string m_getName();
