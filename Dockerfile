@@ -22,7 +22,7 @@ RUN git clone --branch 1.6.2 https://github.com/libcpr/cpr &&\
     make install
 
 # get crow's include/ dir
-RUN git clone --branch v0.3 https://github.com/CrowCpp/crow &&\
+RUN git clone --branch v0.3+3 https://github.com/CrowCpp/crow &&\
     cp -r crow/include include &&\
 # make a directory we'll use to build
     mkdir build

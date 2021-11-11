@@ -11,12 +11,10 @@
 #include "DDserver.h"
 #include "Settings.h"
 #include "LockManager.h"
-#include "Request.h"
+#include "BackupManager.h"
 
 namespace DoubleD
 {
-    std::mutex DDserver::storageMutex;
-
     //runtime functions
     void DDserver::startup()
     {
@@ -47,13 +45,13 @@ namespace DoubleD
             std::vector<std::string> jsonList;
             x["locks"] = jsonList;
 
-            storageMutex.lock();
+            LockManager::storageMutex.lock();
             for (size_t i = 0; i < LockManager::lockVector.size(); i++) {
                 x["locks"][i]["lockname"] = LockManager::lockVector[i].m_getName();
                 x["locks"][i]["sessiontoken"] = LockManager::lockVector[i].m_getSessionToken();
                 x["locks"][i]["remaining"] = LockManager::lockVector[i].m_timeLeft();
             }
-            storageMutex.unlock();
+            LockManager::storageMutex.unlock();
             return crow::response(200, x);
         });
 
@@ -108,10 +106,9 @@ namespace DoubleD
             x["sessiontoken"] = _lock ? _lock.value().m_getSessionToken() : "";
             x["lockacquired"] = _lock ? true : false;
             x["lockname"] = _lockName;
-            Request r;
-            std::string url = "http://0.0.0.0:8000/getlock?auth=" + Settings::api_key + "&lockname=" + _lockName;
-            r.GET(url.c_str());
-            std::cout << r.text << "\n";
+
+            BackupManager::sendBackup();
+
             return crow::response(200, x);
         });
 
@@ -135,7 +132,7 @@ namespace DoubleD
             }
 
             bool _released{ false };
-            storageMutex.lock();
+            LockManager::storageMutex.lock();
             for (size_t i = 0; i < LockManager::lockVector.size(); i++) {
 
                 if (_lockName == LockManager::lockVector[i].m_getName() &&
@@ -147,11 +144,20 @@ namespace DoubleD
                     break;
                 }
             }
-            storageMutex.unlock();
+            LockManager::storageMutex.unlock();
             x["lockreleased"] = _released;
             x["lockname"] = _lockName;
+
             return crow::response(_released ? 200 : 400, x);
         });
+
+        CROW_ROUTE(app, "/backup").methods("POST"_method)
+            ([&](const crow::request& req) {
+            BackupManager::receiveBackup(req);
+
+            return crow::response(200);
+        });
+
         std::thread _lifeTime_thread(&LockManager::checkLifetimes);
 
         // configure the app instance with given parameters

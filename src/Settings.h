@@ -18,5 +18,6 @@ namespace DoubleD
 
 		friend class DDserver;
 		friend class LockManager;
+		friend class BackupManager;
 	};
 }

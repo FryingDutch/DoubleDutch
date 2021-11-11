@@ -8,6 +8,7 @@ namespace DoubleD
 	struct LockManager
 	{
 	private:
+		static std::mutex storageMutex;
 		static std::vector<Lock> lockVector;
 
 	private:
@@ -17,5 +18,6 @@ namespace DoubleD
 		static void checkLifetimes();
 
 		friend class DDserver;
+		friend class BackupManager;
 	};
 }
