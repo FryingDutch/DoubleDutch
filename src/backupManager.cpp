@@ -15,27 +15,30 @@ namespace DoubleD
 
 	void BackupManager::sendBackup()
 	{
-		crow::json::wvalue x;
-		std::vector<std::string> jsonList;
-		x["locks"] = jsonList;
-
-		LockManager::storageMutex.lock();
-		for (size_t i = 0; i < LockManager::lockVector.size(); i++)
+		if (backup_adresses.size() > 0)
 		{
-			x["locks"][i]["lockname"] = LockManager::lockVector[i].m_getName();
-			x["locks"][i]["sessiontoken"] = LockManager::lockVector[i].m_getSessionToken();
-			x["locks"][i]["remaining"] = LockManager::lockVector[i].m_timeLeft();
-		}
-		LockManager::storageMutex.unlock();
+			crow::json::wvalue x;
+			std::vector<std::string> jsonList;
+			x["locks"] = jsonList;
 
-		for (size_t i = 0; i < backup_adresses.size(); i++)
-		{
-			std::string url = "http://" + backup_adresses[i] + ":" + std::to_string(Settings::port) + "/backup";
-			cpr::Response response = cpr::Post
-			(
-				cpr::Url{ url },
-				cpr::Body{ x.dump() }
-			);
+			LockManager::storageMutex.lock();
+			for (size_t i = 0; i < LockManager::lockVector.size(); i++)
+			{
+				x["locks"][i]["lockname"] = LockManager::lockVector[i].m_getName();
+				x["locks"][i]["sessiontoken"] = LockManager::lockVector[i].m_getSessionToken();
+				x["locks"][i]["remaining"] = LockManager::lockVector[i].m_timeLeft();
+			}
+			LockManager::storageMutex.unlock();
+
+			for (size_t i = 0; i < backup_adresses.size(); i++)
+			{
+				std::string url = "http://" + backup_adresses[i] + ":" + std::to_string(Settings::port) + "/backup";
+				cpr::Response response = cpr::Post
+				(
+					cpr::Url{ url },
+					cpr::Body{ x.dump() }
+				);
+			}
 		}
 	}
 
@@ -44,7 +47,7 @@ namespace DoubleD
 		std::vector<Lock> tempVec;
 
 		crow::json::wvalue x = crow::json::load(req.body);
-		for (size_t i = 0; i < x.size(); i++)
+		for (size_t i = 0; i < x["locks"].size(); i++)
 		{
 			tempVec.push_back(Lock{ x["locks"][i]["lockname"].dump(), std::stod(x["locks"][i]["remaining"].dump()), x["locks"][i]["sessiontoken"].dump() });
 		}
