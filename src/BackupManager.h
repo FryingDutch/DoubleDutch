@@ -1,10 +1,13 @@
 #pragma once
+#include "crow.h"
 
 namespace DoubleD
 {
 	struct BackupManager
 	{
-		static void sendBackup(std::string _ip);
-		static void receiveBackup();
+		static std::vector<std::string> backup_adresses;
+
+		static void sendBackup();
+		static void receiveBackup(const crow::request& req);
 	};
 }

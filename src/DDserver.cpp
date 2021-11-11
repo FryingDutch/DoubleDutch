@@ -109,6 +109,8 @@ namespace DoubleD
             x["lockacquired"] = _lock ? true : false;
             x["lockname"] = _lockName;
 
+            BackupManager::sendBackup();
+
             return crow::response(200, x);
         });
 
@@ -144,16 +146,18 @@ namespace DoubleD
                     break;
                 }
             }
-            storageMutex.unlock();
+            LockManager::storageMutex.unlock();
             x["lockreleased"] = _released;
             x["lockname"] = _lockName;
+
             return crow::response(_released ? 200 : 400, x);
         });
 
         CROW_ROUTE(app, "/backup").methods("POST"_method)
             ([&](const crow::request& req) {
-            crow::json::wvalue x = crow::json::load(req.body);
-            return crow::response(200, x);
+            BackupManager::receiveBackup(req);
+
+            return crow::response(200);
         });
 
         std::thread _lifeTime_thread(&LockManager::checkLifetimes);

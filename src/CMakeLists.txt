@@ -4,7 +4,6 @@ project ( server )
 add_executable(server 
 		main.cpp
 		lock.cpp
-		request.cpp
 		settings.cpp
 		lockManager.cpp
 		backupManager.cpp
