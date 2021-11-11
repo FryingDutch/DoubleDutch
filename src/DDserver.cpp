@@ -204,7 +204,8 @@ namespace DoubleD
     void DDserver::setAndBoot(int32_t _argc, char* _argv[])
     {
         Settings::handleCommandLineArguments(_argv, _argc);
-        if (!Settings::custom_api_key) Settings::loadApiKey();
+        if (!Settings::custom_api_key)
+            Settings::loadApiKey();
 
         if (Settings::port > 0 && Settings::threads > 0 && Settings::precision > -1)
         {
