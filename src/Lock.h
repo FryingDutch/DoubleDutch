@@ -1,5 +1,4 @@
-#ifndef LOCK_H
-#define LOCK_H
+#pragma once
 #include <string>
 #include <chrono>
 
@@ -23,5 +22,3 @@ namespace DoubleD
         std::string m_getSessionToken();
     };
 }
-
-#endif
