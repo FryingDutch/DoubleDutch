@@ -30,11 +30,13 @@ namespace DoubleD
 		}
 		DDserver::storageMutex.unlock();
 
-		std::string url = "http://" + _ip + ":" + std::to_string(Settings::port) + "/status";
+		std::string url = "http://" + _ip + ":" + std::to_string(Settings::port) + "/backup";
+		std::string jsonBody = crow::json::dump(x);
+
 		cpr::Response response = cpr::Post
 		(
 			cpr::Url{ url },
-			cpr::Body{ {"auth", "randomapikey"} }
+			cpr::Body{ jsonBody }
 		);
 	}
 
