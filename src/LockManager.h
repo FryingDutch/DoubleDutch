@@ -8,6 +8,7 @@ namespace DoubleD
 	struct LockManager
 	{
 	private:
+		static std::mutex storageMutex;
 		static std::vector<Lock> lockVector;
 
 	private:

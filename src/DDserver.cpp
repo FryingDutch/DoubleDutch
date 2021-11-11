@@ -15,8 +15,6 @@
 
 namespace DoubleD
 {
-    std::mutex DDserver::storageMutex;
-
     //runtime functions
     void DDserver::startup()
     {
@@ -47,13 +45,13 @@ namespace DoubleD
             std::vector<std::string> jsonList;
             x["locks"] = jsonList;
 
-            storageMutex.lock();
+            LockManager::storageMutex.lock();
             for (size_t i = 0; i < LockManager::lockVector.size(); i++) {
                 x["locks"][i]["lockname"] = LockManager::lockVector[i].m_getName();
                 x["locks"][i]["sessiontoken"] = LockManager::lockVector[i].m_getSessionToken();
                 x["locks"][i]["remaining"] = LockManager::lockVector[i].m_timeLeft();
             }
-            storageMutex.unlock();
+            LockManager::storageMutex.unlock();
             return crow::response(200, x);
         });
 
@@ -134,7 +132,7 @@ namespace DoubleD
             }
 
             bool _released{ false };
-            storageMutex.lock();
+            LockManager::storageMutex.lock();
             for (size_t i = 0; i < LockManager::lockVector.size(); i++) {
 
                 if (_lockName == LockManager::lockVector[i].m_getName() &&

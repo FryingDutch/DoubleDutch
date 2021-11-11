@@ -9,6 +9,7 @@
 
 namespace DoubleD
 {
+    std::mutex LockManager::storageMutex;
     std::vector<Lock> LockManager::lockVector;
 
     // returns a Lock if a Lock can be acquired, otherwise returns boost::none.
@@ -16,7 +17,7 @@ namespace DoubleD
     {
         // determine whether the lock with <lockName> is free/available
         bool _free{ true };
-        DDserver::storageMutex.lock();
+        LockManager::storageMutex.lock();
         for (size_t i = 0; i < lockVector.size(); i++)
         {
             if (lockName == lockVector[i].m_getName() && !lockVector[i].m_expired())
@@ -31,7 +32,7 @@ namespace DoubleD
             _lock = Lock(lockName, LIFETIME);
             lockVector.push_back(_lock.value());
         }
-        DDserver::storageMutex.unlock();
+        LockManager::storageMutex.unlock();
         return _lock;
     }
 
@@ -40,7 +41,7 @@ namespace DoubleD
         while (Settings::isRunning)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(Settings::precision));
-            DDserver::storageMutex.lock();
+            LockManager::storageMutex.lock();
             for (size_t i = 0; i < lockVector.size(); i++)
             {
                 if (lockVector[i].m_expired())
@@ -49,7 +50,7 @@ namespace DoubleD
                     lockVector.shrink_to_fit();
                 }
             }
-            DDserver::storageMutex.unlock();
+            LockManager::storageMutex.unlock();
         }
     }
 }
