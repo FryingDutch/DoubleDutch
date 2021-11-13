@@ -6,6 +6,7 @@
 #include "Settings.h"
 #include "DDserver.h"
 #include "LockManager.h"
+#include "BackupManager.h"
 
 namespace DoubleD
 {
@@ -28,9 +29,15 @@ namespace DoubleD
         }
         // insert a Lock if <lockName> is free/available
         std::optional<Lock> _lock;
-        if (_free) {
+        if (_free)
+        {
             _lock = Lock(lockName, LIFETIME);
             lockVector.push_back(_lock.value());
+
+            if (BackupManager::sendBackup() != 200)
+            {
+                lockVector.pop_back();
+            }
         }
         LockManager::storageMutex.unlock();
         return _lock;

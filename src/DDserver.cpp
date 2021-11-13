@@ -107,8 +107,6 @@ namespace DoubleD
             x["lockacquired"] = _lock ? true : false;
             x["lockname"] = _lockName;
 
-            BackupManager::sendBackup();
-
             return crow::response(200, x);
         });
 
@@ -209,7 +207,7 @@ namespace DoubleD
 
         if (Settings::port > 0 && Settings::threads > 0 && Settings::precision > -1)
         {
-            if (!Settings::error) 
+            if (!Settings::error)
                 DDserver::startup();
         }
 
