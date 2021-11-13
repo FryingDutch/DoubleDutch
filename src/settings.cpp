@@ -17,6 +17,8 @@ namespace DoubleD
     bool Settings::error{ false };
     bool Settings::isRunning{ true };
     bool Settings::custom_api_key{ false };
+    bool Settings::hasBackup{ false };
+    bool Settings::needBackup{ false };
 
 
     //setting functions

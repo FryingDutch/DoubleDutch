@@ -8,7 +8,7 @@ namespace DoubleD
 	private:
 		static std::string server_name, crt_file_path, key_file_path, api_key;
 		static int32_t port, precision, threads;
-		static bool is_https, error, isRunning, custom_api_key;
+		static bool is_https, error, isRunning, custom_api_key, hasBackup, needBackup;
 
 	private:
 		static void errormsg(const char* message);
