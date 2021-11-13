@@ -5,7 +5,7 @@ services:
     build:
       context: .
       args:
-        DO_BUILD: production
+        DO_BUILD: production_no_test
     command: "8000 h 0" # The port is required as the first commandline argument ALWAYS
     ports: 
       - "8000:8000"
