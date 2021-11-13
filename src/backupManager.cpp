@@ -10,9 +10,9 @@
 
 namespace DoubleD
 {
-	std::vector<std::string> BackupManager::backup_adresses;
+	std::vector<BackupManager::BackupAdres> BackupManager::backup_adresses;
 
-	void BackupManager::sendBackup()
+	uint32_t BackupManager::sendBackup()
 	{
 		if (backup_adresses.size() > 0)
 		{
@@ -31,12 +31,12 @@ namespace DoubleD
 			}
 			LockManager::storageMutex.unlock();
 
-			// loop trough all the IP adresses of the backupserver
+			// loop trough all the IP adresses of the backupservers
 			for (size_t i = 0; i < backup_adresses.size(); i++)
 			{
 				// check if request needs to be http(s)
 				std::string url{ Settings::is_https ? "https://" : "http://" };
-				url += backup_adresses[i] + ":" + std::to_string(Settings::port) + "/backup";
+				url += backup_adresses[i].adres + ":" + std::to_string(Settings::port) + "/backup";
 
 				// send POST request with all the locks
 				cpr::Response response = cpr::Post
@@ -44,8 +44,27 @@ namespace DoubleD
 					cpr::Url{ url },
 					cpr::Body{ x.dump() }
 				);
+
+				if (response.status_code != 200)
+				{
+					// Check how often the backup-address has failed
+					if (++backup_adresses[i].tries > 3)
+					{
+						// Remove if happend more then three times
+						backup_adresses.erase(backup_adresses.begin() + i);
+						backup_adresses.shrink_to_fit();
+
+						// if there are no more backup addresses, then set hasBackup to false
+						if (backup_adresses.size() == 0)
+						{
+							Settings::hasBackup = false;
+							return response.status_code;
+						}
+					}
+				}
 			}
 		}
+		return 200;
 	}
 
 	void BackupManager::receiveBackup(const crow::request& req)
