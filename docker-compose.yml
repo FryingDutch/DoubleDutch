@@ -2,25 +2,28 @@ version: "3.3"
 
 services:
   dd_server:
-    build:
-      context: .
-      args:
-        DO_BUILD: production_no_test
+    image: fryingdutch/doubledutch:v0.3.0
     command: "8000 h 0" # The port is required as the first commandline argument ALWAYS
     ports: 
       - "8000:8000"
     secrets:
-#      - source: crt                                # Uncomment if you want to use https
-#        target: /certificate.crt
-#      - source: key
-#        target: /privateKey.key
       - source: API-key
         target: /config.txt
+    deploy:
+      replicas: 1
+  dd_backup:
+    image: fryingdutch/doubledutch:v0.3.0
+    command: "8000 h 0" # The port is required as the first commandline argument ALWAYS
+    ports: 
+      - "8000:8000"
+    secrets:
+      - source: API-key
+        target: /config.txt
+    deploy:
+      replicas: 1
+
 secrets:
-#  key:
-#    file: D:\your\own\directory\certs\customkey.key # change this if you want to use https         # uncomment for https
-#  crt:
-#    file: D:\your\own\directory\certs\customcrt.crt # change this if you want to use https
   API-key:
     file: ./config.txt # change this if you want to use a different file location/name for the API-key
+    
   
