@@ -2,6 +2,7 @@
 #define LOCK_H
 #include <string>
 #include <chrono>
+#include <mutex>
 
 namespace DoubleD
 {
@@ -13,7 +14,13 @@ namespace DoubleD
         std::chrono::_V2::system_clock::time_point m_start;
 
     private:
-        std::string m_createToken();
+        static std::mutex sessionTokenMutex;
+
+    public:
+        static std::vector<std::string> currentSessionTokens;
+
+    private:
+        std::string m_createToken(bool isFirstCycle = true);
 
     public:
         Lock(std::string _name, double _lifeTime);
@@ -21,6 +28,7 @@ namespace DoubleD
         double m_timeLeft();
         std::string m_getName();
         std::string m_getSessionToken();
+        void m_removeSessionToken();
     };
 }
 

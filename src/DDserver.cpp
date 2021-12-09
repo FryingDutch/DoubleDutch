@@ -287,6 +287,7 @@ namespace DoubleD
                     _session_token == DDserver::lockVector[i].m_getSessionToken())
                 {
                     DDserver::lockVector.erase(DDserver::lockVector.begin() + i);
+                    DDserver::lockVector[i].m_removeSessionToken();
                     DDserver::lockVector.shrink_to_fit();
                     _released = true;
                     break;
@@ -333,6 +334,7 @@ namespace DoubleD
             {
                 if (DDserver::lockVector[i].m_expired())
                 {
+                    DDserver::lockVector[i].m_removeSessionToken();
                     DDserver::lockVector.erase(DDserver::lockVector.begin() + i);
                     DDserver::lockVector.shrink_to_fit();
                 }
