@@ -83,10 +83,10 @@ def test_lock_and_expire():
     
 
 def test_long_expiration():
-    # Test whether the server accepts a very long timeout (one week).
-    lock_name = 'expires_after_one_week'
-    expiration_in_days = 7
-    expiration_in_seconds = expiration_in_days * 7 * 24 * 60 * 60
+    # Test whether the server accepts a very long timeout (two weeks).
+    lock_name = 'expires_after_two_weeks'
+    expiration_in_weeks = 2
+    expiration_in_seconds = expiration_in_weeks * 7 * 24 * 60 * 60
     requests.get(f"{BASE_URL}/getlock?lockname={lock_name}&auth={API_KEY}&lifetime={expiration_in_seconds}").json()
     locks = requests.get(f"{BASE_URL}/status?auth={API_KEY}").json()['locks']
     lock = [l for l in locks if l['lockname'] == lock_name][0]
