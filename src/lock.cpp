@@ -49,10 +49,13 @@ namespace DoubleD
 				newToken = m_createToken(false);
 			}
 		}
-		sessionTokenMutex.unlock();
 
-		if(isFirstCycle)
+		// only push and unlock when first cycle wants to return
+		if (isFirstCycle)
+		{
 			currentSessionTokens.push_back(newToken.substr(0, 32));
+			sessionTokenMutex.unlock();
+		}			
 
 		return newToken.substr(0, 32);
 	}
