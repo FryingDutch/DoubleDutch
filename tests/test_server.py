@@ -1,6 +1,5 @@
 import requests
 import subprocess
-import pytest
 import time
 from threading import Thread
 
@@ -8,12 +7,12 @@ from threading import Thread
 PORT = '8000'
 BASE_URL = f'http://0.0.0.0:{PORT}'
 API_KEY = 'test'
-NUMBER_OF_THREADS = "30"
+NUMBER_OF_THREADS = 30
 NUMBER_OF_LOCKS = 1000
 SERVER_NAME = "TestServer"
 
 # Start the server, wait for one second so that it can properly boot.
-subprocess.Popen(['/server', PORT, 'h', '0', 'a', API_KEY, 't', NUMBER_OF_THREADS, 'n', SERVER_NAME])
+subprocess.Popen(['/server', PORT, 'h', '0', 'a', API_KEY, 't', str(NUMBER_OF_THREADS), 'n', SERVER_NAME])
 time.sleep(1)
 
 
@@ -31,16 +30,12 @@ def test_many_locks():
         get_lock = requests.get(f"{BASE_URL}/getlock?lockname={number}&auth={API_KEY}&lifetime=1000").json()
         assert get_lock['lockacquired'] == True, 'lock should be free'
 
-    # Fire off many requests (todo: parallellize this to inspect threading behaviour?).
-    threads = []
-    for number in range(NUMBER_OF_LOCKS):
-        thread = Thread(target=worker_thread, args=(number,))
-        threads.append(thread)
-        threads[number].start()
-
+    # Fire off many requests.
+    threads = [Thread(target = worker_thread, args = (number,)) for number in range(NUMBER_OF_LOCKS)]
+    [thread.start() for thread in threads]
     work = True
-    for number in range(NUMBER_OF_LOCKS):
-        threads[number].join()       
+    [thread.join() for thread in threads]
+
         
     # Check whether there are now NUMBER_OF_LOCKS locks.
     status = requests.get(f"{BASE_URL}/status?auth={API_KEY}").json()
@@ -74,9 +69,9 @@ def test_lock_and_release():
 
 
 def test_lock_and_expire():
-    # Tet a new lock with a lifetime of 1.
+    # Test a new lock with a lifetime of 1.
     lock_name = 'test_lock_and_expire'
-    get_lock = requests.get(f"{BASE_URL}/getlock?lockname={lock_name}&auth={API_KEY}&lifetime=1").json()
+    requests.get(f"{BASE_URL}/getlock?lockname={lock_name}&auth={API_KEY}&lifetime=1").json()
 
     # Try to acquire the lock again - which should not be possible NOW.
     again = requests.get(f"{BASE_URL}/getlock?lockname={lock_name}&auth={API_KEY}&timeout=0").json()
@@ -86,6 +81,18 @@ def test_lock_and_expire():
     again = requests.get(f"{BASE_URL}/getlock?lockname={lock_name}&auth={API_KEY}&timeout=1").json()
     assert again['lockacquired'] == True, f"lock {lock_name} should now be free/expired"
     
+
+def test_long_expiration():
+    # Test whether the server accepts a very long timeout (two weeks).
+    lock_name = 'expires_after_two_weeks'
+    expiration_in_weeks = 2
+    expiration_in_seconds = expiration_in_weeks * 7 * 24 * 60 * 60
+    requests.get(f"{BASE_URL}/getlock?lockname={lock_name}&auth={API_KEY}&lifetime={expiration_in_seconds}").json()
+    locks = requests.get(f"{BASE_URL}/status?auth={API_KEY}").json()['locks']
+    lock = [l for l in locks if l['lockname'] == lock_name][0]
+    remaining_seconds = lock['remaining']
+    assert remaining_seconds <= expiration_in_seconds and remaining_seconds > (expiration_in_seconds - 1)
+   
 
 
 def test_auth():
