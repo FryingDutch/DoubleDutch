@@ -82,6 +82,18 @@ def test_lock_and_expire():
     assert again['lockacquired'] == True, f"lock {lock_name} should now be free/expired"
     
 
+def test_long_expiration():
+    # Test whether the server accepts a very long timeout (one week).
+    lock_name = 'expires_after_one_week'
+    expiration_in_days = 7
+    expiration_in_seconds = expiration_in_days * 7 * 24 * 60 * 60
+    requests.get(f"{BASE_URL}/getlock?lockname={lock_name}&auth={API_KEY}&lifetime={expiration_in_seconds}").json()
+    locks = requests.get(f"{BASE_URL}/status?auth={API_KEY}").json()['locks']
+    lock = [l for l in locks if l['lockname'] == lock_name][0]
+    remaining_seconds = lock['remaining']
+    assert remaining_seconds <= expiration_in_seconds and remaining_seconds > (expiration_in_seconds - 1)
+   
+
 
 def test_auth():
     # Check that the status/ endpoint can't be queried without api key.
