@@ -1,6 +1,5 @@
 import requests
 import subprocess
-import pytest
 import time
 from threading import Thread
 
