@@ -7,12 +7,12 @@ from threading import Thread
 PORT = '8000'
 BASE_URL = f'http://0.0.0.0:{PORT}'
 API_KEY = 'test'
-NUMBER_OF_THREADS = "30"
+NUMBER_OF_THREADS = 30
 NUMBER_OF_LOCKS = 1000
 SERVER_NAME = "TestServer"
 
 # Start the server, wait for one second so that it can properly boot.
-subprocess.Popen(['/server', PORT, 'h', '0', 'a', API_KEY, 't', NUMBER_OF_THREADS, 'n', SERVER_NAME])
+subprocess.Popen(['/server', PORT, 'h', '0', 'a', API_KEY, 't', str(NUMBER_OF_THREADS), 'n', SERVER_NAME])
 time.sleep(1)
 
 
