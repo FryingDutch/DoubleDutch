@@ -30,16 +30,12 @@ def test_many_locks():
         get_lock = requests.get(f"{BASE_URL}/getlock?lockname={number}&auth={API_KEY}&lifetime=1000").json()
         assert get_lock['lockacquired'] == True, 'lock should be free'
 
-    # Fire off many requests (todo: parallellize this to inspect threading behaviour?).
-    threads = []
-    for number in range(NUMBER_OF_LOCKS):
-        thread = Thread(target=worker_thread, args=(number,))
-        threads.append(thread)
-        threads[number].start()
-
+    # Fire off many requests.
+    threads = [Thread(target = worker_thread, args = (number,)) for number in range(NUMBER_OF_LOCKS)]
+    [thread.start() for thread in threads]
     work = True
-    for number in range(NUMBER_OF_LOCKS):
-        threads[number].join()       
+    [thread.join() for thread in threads]
+
         
     # Check whether there are now NUMBER_OF_LOCKS locks.
     status = requests.get(f"{BASE_URL}/status?auth={API_KEY}").json()
