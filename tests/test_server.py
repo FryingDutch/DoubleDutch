@@ -69,9 +69,9 @@ def test_lock_and_release():
 
 
 def test_lock_and_expire():
-    # Tet a new lock with a lifetime of 1.
+    # Test a new lock with a lifetime of 1.
     lock_name = 'test_lock_and_expire'
-    get_lock = requests.get(f"{BASE_URL}/getlock?lockname={lock_name}&auth={API_KEY}&lifetime=1").json()
+    requests.get(f"{BASE_URL}/getlock?lockname={lock_name}&auth={API_KEY}&lifetime=1").json()
 
     # Try to acquire the lock again - which should not be possible NOW.
     again = requests.get(f"{BASE_URL}/getlock?lockname={lock_name}&auth={API_KEY}&timeout=0").json()
