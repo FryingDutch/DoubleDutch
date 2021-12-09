@@ -258,7 +258,7 @@ namespace DoubleD
             crow::json::wvalue x;
             x["servername"] = DDserver::server_name;
 
-            if (req.url_params.get("lockname") == nullptr || req.url_params.get("token") == nullptr)
+            if (req.url_params.get("lockname") == nullptr || req.url_params.get("token") == nullptr || req.url_params.get("auth") == nullptr)
             {
                 x["error"] = "invalid params";
                 return crow::response(400, x);
@@ -266,8 +266,17 @@ namespace DoubleD
 
             else
             {
-                _lockName = req.url_params.get("lockname");
-                _session_token = req.url_params.get("token");
+                if (req.url_params.get("auth") == DDserver::api_key)
+                {
+                    _lockName = req.url_params.get("lockname");
+                    _session_token = req.url_params.get("token");
+                }
+
+                else
+                {
+                    x["error"] = "invalid key";
+                    return crow::response(401, x);
+                }
             }
 
             bool _released{ false };
