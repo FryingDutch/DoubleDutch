@@ -1,6 +1,6 @@
 # DoubleDutch: a distributed advisory lock
 
-[![.github/workflows/build.yml](https://github.com/jessehl/LockManager/actions/workflows/build.yml/badge.svg)](https://github.com/jessehl/LockManager/actions/workflows/build.yml)
+[![.github/workflows/build.yml](https://github.com/FryingDutch/DoubleDutch/actions/workflows/build.yml/badge.svg)](https://github.com/FryingDutch/DoubleDutch/actions/workflows/build.yml)
 
 **DoubleDutch** is a C++ program that coordinates distributed access to shared resources, such as databases or file systems. Clients make requests to DoubleDutch, asking for exclusive usage of a resource (or permission to perform a one-time task). Once the client is finished (or timed-out), the lock is released and ready to be acquired by another client. This project is inspired by MySQL's `GET_LOCK` [function](https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock). DoubleDutch is a http(s) server, based on [CrowCpp](https://github.com/CrowCpp/crow/tree/master). 
 
